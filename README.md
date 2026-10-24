@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/card-readme.png" alt="Card do repositório" width="100%">
+</p>
+
 # EcoCiente — Painel Administrativo (dad-crud)
 
 ![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
