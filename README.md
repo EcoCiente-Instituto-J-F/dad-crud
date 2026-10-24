@@ -23,6 +23,40 @@ Rotas disponíveis:
 | `/condominios`, `/cooperativas`, `/coletas`, `/cursos`, `/quizzes` | Páginas de módulo ainda sem funcionalidade (apenas título e descrição). |
 | `*` | Página "não encontrada". |
 
+### Arquitetura
+
+Fluxo de dados da tela de Usuários (páginas e componentes não importam services; o acesso passa pelo hook):
+
+```mermaid
+flowchart LR
+    P["pages/Usuarios"] --> H["hooks/useUsuarios"]
+    P --> C["components<br/>FiltrosUsuarios · TabelaUsuarios · Paginacao · EstadoRequisicao"]
+    H --> S["services/usuariosService<br/>(atraso de 600 ms + AbortController)"]
+    H --> U["utils/usuarios<br/>filtrar e ordenar"]
+    S --> D[("data/usuarios<br/>dados simulados")]
+```
+
+### Navegação
+
+```mermaid
+flowchart TD
+    R["/"] -->|redireciona| US["/usuarios"]
+    L["Layout<br/>Cabecalho + MenuLateral"] --> US
+    L --> M["/condominios · /cooperativas · /coletas · /cursos · /quizzes<br/>(página Modulo)"]
+    L --> NF["* (NaoEncontrada)"]
+```
+
+### Ciclo da requisição
+
+```mermaid
+stateDiagram-v2
+    [*] --> carregando
+    carregando --> sucesso: lista carregada
+    carregando --> erro: falha
+    erro --> carregando: recarregar()
+    sucesso --> carregando: recarregar()
+```
+
 ## Pré-requisitos
 
 - Node.js compatível com Vite 8 (22.12+ ou 24)
