@@ -1,93 +1,131 @@
-# EcoCiente — login e cadastro
+<p align="center">
+  <img src="assets/card-readme.png" alt="Card do repositório" width="100%">
+</p>
 
-Primeira etapa do frontend acadêmico, criada com `create-vite --template react-ts`. Layout inspirado nas duas referências fornecidas; o fundo usa gradientes e a marca é tipográfica, não é uma reprodução exata da arte original.
+# EcoCiente — Painel Administrativo (dad-crud)
 
-## Executar no Windows / PowerShell
+![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-7-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white)
+![styled-components](https://img.shields.io/badge/styled--components-6-DB7093?style=for-the-badge&logo=styledcomponents&logoColor=white)
+![GitHub repo size](https://img.shields.io/github/repo-size/EcoCiente-Instituto-J-F/dad-crud?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/EcoCiente-Instituto-J-F/dad-crud?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
-Instale uma versão LTS recente do Node.js compatível com Vite 8 (22.12+ ou 24).
-Extraia o ZIP, abra a pasta `ecociente-front` no VS Code e execute:
+> Frontend administrativo do EcoCiente para gerenciar usuários, condomínios, cooperativas, coletas, cursos e quizzes.
 
-```powershell
+## Sobre o projeto
+
+Aplicação de página única (SPA) em React + TypeScript. Hoje a tela de **Usuários** está implementada, com listagem, busca, filtro por status, ordenação por nome e paginação (6 itens por página). Os dados vêm de uma lista simulada em `src/data/usuarios.ts`, servida por `src/services/usuariosService.ts` com atraso artificial e suporte a cancelamento (`AbortController`); **ainda não há integração com API real**.
+
+Rotas disponíveis:
+
+| Rota | Situação |
+| --- | --- |
+| `/usuarios` | Implementada (dados simulados). A rota `/` redireciona para ela. |
+| `/condominios`, `/cooperativas`, `/coletas`, `/cursos`, `/quizzes` | Páginas de módulo ainda sem funcionalidade (apenas título e descrição). |
+| `*` | Página "não encontrada". |
+
+### Arquitetura
+
+Fluxo de dados da tela de Usuários (páginas e componentes não importam services; o acesso passa pelo hook):
+
+```mermaid
+flowchart LR
+    P["pages/Usuarios"] --> H["hooks/useUsuarios"]
+    P --> C["components<br/>FiltrosUsuarios · TabelaUsuarios · Paginacao · EstadoRequisicao"]
+    H --> S["services/usuariosService<br/>(atraso de 600 ms + AbortController)"]
+    H --> U["utils/usuarios<br/>filtrar e ordenar"]
+    S --> D[("data/usuarios<br/>dados simulados")]
+```
+
+### Navegação
+
+```mermaid
+flowchart TD
+    R["/"] -->|redireciona| US["/usuarios"]
+    L["Layout<br/>Cabecalho + MenuLateral"] --> US
+    L --> M["/condominios · /cooperativas · /coletas · /cursos · /quizzes<br/>(página Modulo)"]
+    L --> NF["* (NaoEncontrada)"]
+```
+
+### Ciclo da requisição
+
+```mermaid
+stateDiagram-v2
+    [*] --> carregando
+    carregando --> sucesso: lista carregada
+    carregando --> erro: falha
+    erro --> carregando: recarregar()
+    sucesso --> carregando: recarregar()
+```
+
+## Pré-requisitos
+
+- Node.js compatível com Vite 8 (22.12+ ou 24)
+- npm
+
+## Instalando
+
+```bash
+git clone https://github.com/EcoCiente-Instituto-J-F/dad-crud.git
+cd dad-crud
 npm install
-npm run dev
+cp .env.example .env.local      # Windows (PowerShell): Copy-Item .env.example .env.local
 ```
 
-Abra o endereço informado no terminal. Verificações:
+O `.env.example` declara `VITE_API_URL`, `VITE_LOGIN_PATH` e `VITE_CADASTRO_PATH`, mas o código atual não lê nenhuma delas. Variáveis `VITE_*` são públicas no bundle: **nunca coloque segredos nelas**.
 
-```powershell
-npm run build
-npm run lint
+## Usando
+
+```bash
+npm run dev       # servidor de desenvolvimento
+npm run build     # tsc -b && vite build (saída em dist/)
+npm run preview   # serve o build localmente
 ```
 
-## O que está pronto
+O `vercel.json` reescreve todas as rotas para `index.html`, o que permite publicar a SPA na Vercel (framework Vite, comando `npm run build`, pasta `dist`).
 
-- Login e cadastro com nome, e-mail, senha e confirmação.
-- Componentes visuais em pasta própria com index.tsx; interfaces de props em types/componentes.ts.
-- Tipos do domínio em types/autenticacao.ts, sem `any` no código fonte.
-- Oito componentes, páginas separadas, hooks para orquestrar validação e chamadas.
-- Serviços com Promise tipada e try/catch. Páginas e componentes não importam services.
-- useState com dados relacionados agrupados, atualizações imutáveis.
-- Cancelamento via AbortController ao desmontar o formulário e bloqueio de envios duplicados.
-- Dependências explícitas de useEffect; useTitulo reage à mudança do título recebido.
-- Rotas /login, /cadastro, /recuperar-senha e curinga. Recuperação é apenas uma página informativa nesta etapa.
-- React.lazy e Suspense por página.
-- Labels, mensagens no DOM, role=alert, foco visível, link para pular conteúdo e foco no primeiro campo inválido.
-- Conteúdo dinâmico via JSX, sem HTML externo injetado. Senhas não são modificadas pela sanitização nem persistidas.
-- CSS em styles/, fora de src/, para respeitar literalmente a regra de apenas .ts/.tsx dentro de src/.
+## Testes
 
-## Integração com sua API: pendente do contrato real
+Ainda não há testes automatizados. Verificações disponíveis:
 
-O formulário funciona e valida localmente. Não há autenticação simulada, banco local ou sessão implementada. Sem configuração, enviar dados válidos mostra uma mensagem clara de API não configurada.
-
-Copie `.env.example` para `.env.local` e preencha URL e caminhos reais. Os nomes são:
-
-```
-VITE_API_URL=
-VITE_LOGIN_PATH=
-VITE_CADASTRO_PATH=
+```bash
+npm run lint      # oxlint
+npm run build     # checagem de tipos + build
 ```
 
-Contrato PROVISÓRIO em src/services/autenticacao.ts:
+## Estrutura do projeto
 
-- Login POST: `{ "email": "...", "senha": "..." }`.
-- Cadastro POST: `{ "nome": "...", "email": "...", "senha": "..." }`.
-- Confirmação de senha não vai ao servidor.
-- Atualmente, HTTP 2xx é interpretado como operação aceita. O corpo da resposta não é consumido.
+```
+.
+├── .github/workflows/pr-bot.yml   # gera a descrição das Pull Requests
+├── scripts/pr-bot/                # script Python do bot de PR
+├── styles/global.css              # CSS global (fora de src/)
+├── src/
+│   ├── components/                # Cabecalho, EstadoRequisicao, FiltrosUsuarios,
+│   │                              # Layout, MenuLateral, Paginacao, TabelaUsuarios
+│   ├── data/usuarios.ts           # usuários simulados
+│   ├── hooks/useUsuarios.ts       # estado, filtros e paginação
+│   ├── pages/                     # Usuarios, Modulo, NaoEncontrada
+│   ├── services/usuariosService.ts
+│   ├── types/                     # layout, requisicao, usuario
+│   ├── utils/usuarios.ts          # filtro e ordenação
+│   ├── App.tsx                    # rotas (React.lazy)
+│   └── main.tsx
+├── vercel.json
+└── vite.config.ts
+```
 
-Antes de usar com o backend, ajustar DTOs, endpoints, respostas e política de senha conforme Swagger/controllers. Integrar token ou cookie, renovação/expiração, logout e destino pós-login conforme o contrato. Se usar cookies entre origens, configurar credentials e CORS corretamente. Não enviar dados reais antes desse alinhamento. O backend deve validar, autorizar e armazenar senhas de forma segura independentemente do frontend.
+## Contribuindo
 
-Variáveis VITE_* são públicas no bundle: NÃO colocar senhas, chaves privadas ou outros segredos nelas. .env.local é ignorado pelo Git. URLs e segredos privados de verdade devem permanecer no backend.
+Leia o [CONTRIBUTING.md](CONTRIBUTING.md) antes de abrir uma Pull Request. Ao participar, você concorda com o [Código de Conduta](CODE_OF_CONDUCT.md).
 
-## Pendências da avaliação completa
+## Segurança
 
-| Critério | Situação |
-|---|---|
-| Publicação Vercel/GitHub Pages e link | Pendente. vercel.json já contempla rotas SPA. |
-| 20 commits em 4 semanas | Devem ser feitos durante o desenvolvimento real; nenhum histórico foi fabricado. |
-| Listas dinâmicas e keys por ID | Aplicar quando a tela de listagem for criada. |
-| useParams com tratamento de undefined | Aplicar em uma futura rota de detalhe; não há parâmetro nessas telas. |
-| Context, Provider, hook e PrivateRoute | Próxima etapa, após definir o contrato de sessão. |
-| useReducer | Só implementar quando houver complexidade real para justificar. |
-| localStorage versionado | Não usado nesta etapa. Não armazenar senha. |
-| useMemo/useCallback com Profiler | Não adicionados artificialmente; demonstrar benefício real em telas futuras. |
-| Acessibilidade AA integral | Precisa de auditoria, testes com teclado, zoom e leitor de tela. Não certificada. |
-| Recuperação de senha | Página informativa; formulário e serviço ainda não implementados. |
+Encontrou uma vulnerabilidade? Siga o [SECURITY.md](SECURITY.md). **Não abra issue pública.**
 
-Para publicar: importar seu repositório na Vercel, escolher Vite, comando `npm run build` e pasta `dist`; cadastrar variáveis públicas reais e inserir a URL resultante neste README. A publicação não foi feita nesta entrega.
+## Licença
 
-Sugestões de commits conforme você desenvolver: `feat: cria telas de login e cadastro`, `feat: integra autenticacao com API`, `fix: corrige foco nos erros do formulario`, `docs: documenta execucao e publicacao`. Não alterar datas ou dividir artificialmente esta entrega para simular quatro semanas.
-
-## Conferência manual
-
-1. Abrir /login e navegar até cadastro usando teclado.
-2. Enviar vazio; conferir mensagens e foco no primeiro campo inválido.
-3. Testar e-mail inválido, nome curto, senha curta e confirmação diferente.
-4. Mostrar e ocultar as duas senhas independentemente.
-5. Enviar dados válidos sem .env: conferir erro de configuração.
-6. Com backend integrado: conferir carregamento, 2xx, 401, 409, 422 e falha de rede.
-7. Trocar de rota durante requisição lenta; verificar cancelamento.
-8. Acessar URL inexistente e voltar ao login.
-9. Conferir celular, zoom 200%, contraste e leitor de tela.
-10. Abrir Network: verificar chunks separados das páginas.
-
-Build TypeScript/Vite e lint executados nesta entrega. A verificação automatizada em navegador não pôde ser concluída porque o executável do Chromium não está instalado no ambiente. A integração ponta a ponta depende do backend real.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE).
