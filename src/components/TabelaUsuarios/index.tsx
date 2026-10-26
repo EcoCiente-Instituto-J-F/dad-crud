@@ -5,6 +5,8 @@ import {
 
 import type { TabelaUsuariosProps } from "../../types/usuario";
 
+import { Link } from "react-router-dom";
+
 export default function TabelaUsuarios({
   usuarios,
 }: TabelaUsuariosProps) {
@@ -40,9 +42,12 @@ export default function TabelaUsuarios({
                     {obterIniciais(usuario.nome)}
                   </span>
 
-                  <span className="usuario-nome">
+                  <Link
+                    className="usuario-nome usuario-link"
+                    to={`/usuarios/${usuario.id}`}
+                  >
                     {usuario.nome}
-                  </span>
+                  </Link>
                 </div>
               </td>
 

@@ -46,3 +46,44 @@ export interface PaginacaoProps {
   porPagina: number;
   onPaginaChange: (pagina: number) => void;
 }
+
+export interface CadastroUsuario {
+  nome: string;
+  email: string;
+  cidade: string;
+  uf: string;
+  tipo: TipoUsuario;
+}
+
+export type ErrosCadastroUsuario = Partial<
+  Record<keyof CadastroUsuario, string>
+>;
+
+export type ResultadoValidacaoUsuario =
+  | {
+    valido: true;
+    dados: CadastroUsuario;
+  }
+  | {
+    valido: false;
+    erros: ErrosCadastroUsuario;
+  };
+
+export interface FormularioUsuarioProps {
+  formulario: CadastroUsuario;
+  erros: ErrosCadastroUsuario;
+  salvando: boolean;
+  textoBotao: string;
+  caminhoVoltar: string;
+  mensagemErro?: string;
+  onAlterar: <K extends keyof CadastroUsuario>(
+    campo: K,
+    valor: CadastroUsuario[K],
+  ) => void;
+  onSalvar: () => Promise<void>;
+}
+
+export interface DesativarUsuarioProps {
+  usuarioId: string;
+  onDesativado: () => void;
+}
