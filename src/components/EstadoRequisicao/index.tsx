@@ -12,27 +12,30 @@ export default function EstadoRequisicao({
       <div className="estado-requisicao" role="status">
         <LoaderCircle
           className="icone-carregando"
-          size={28}
+          size={32}
           aria-hidden="true"
         />
-
-        <p>{mensagem ?? "Carregando usuários..."}</p>
+        <p>{mensagem ?? "Carregando dados..."}</p>
       </div>
     );
   }
 
   return (
     <div className="estado-requisicao estado-requisicao--erro">
-      <TriangleAlert size={28} aria-hidden="true" />
+      <div className="erro-ilustracao">
+        <TriangleAlert size={42} aria-hidden="true" />
+      </div>
+
+      <h2>Não foi possível carregar os dados</h2>
 
       <p role="alert">
-        {mensagem ?? "Não foi possível concluir a operação."}
+        {mensagem ?? "Ocorreu uma falha durante a operação."}
       </p>
 
       {onTentarNovamente && (
         <button
           type="button"
-          className="botao"
+          className="botao botao--primario"
           onClick={onTentarNovamente}
         >
           Tentar novamente

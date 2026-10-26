@@ -1,4 +1,5 @@
 import { RefreshCw } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import EstadoRequisicao from "../../components/EstadoRequisicao";
 import FiltrosUsuarios from "../../components/FiltrosUsuarios";
@@ -33,15 +34,24 @@ export default function Usuarios() {
           </p>
         </div>
 
-        <button
-          type="button"
-          className="botao"
-          onClick={recarregar}
-          disabled={requisicao.status === "carregando"}
-        >
-          <RefreshCw size={17} aria-hidden="true" />
-          Atualizar
-        </button>
+        <div className="acoes-pagina">
+          <button
+            type="button"
+            className="botao"
+            onClick={recarregar}
+            disabled={requisicao.status === "carregando"}
+          >
+            <RefreshCw size={17} aria-hidden="true" />
+            Atualizar
+          </button>
+
+          <Link
+            className="botao botao--primario"
+            to="/usuarios/cadastrar"
+          >
+            Cadastrar
+          </Link>
+        </div>
       </div>
 
       <FiltrosUsuarios
