@@ -88,7 +88,6 @@ export default function PainelAcessibilidade() {
   const rota = useLocation();
 
   const fechar = useCallback(() => setAberto(false), []);
-  const abrir = useCallback(() => setAberto(true), []);
   const anunciar = useCallback((mensagem: string) => setAviso(mensagem), []);
 
   useEffect(() => {
