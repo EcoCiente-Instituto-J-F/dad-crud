@@ -4,8 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import AuthProvider from "./components/AuthProvider";
+import AcessibilidadeProvider from "./components/AcessibilidadeProvider";
 
 import "../styles/global.css";
+import "../styles/acessibilidade.css";
 
 const elementoRaiz = document.getElementById("root");
 
@@ -16,9 +18,11 @@ if (!elementoRaiz) {
 createRoot(elementoRaiz).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <AcessibilidadeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </AcessibilidadeProvider>
     </BrowserRouter>
   </StrictMode>,
 );

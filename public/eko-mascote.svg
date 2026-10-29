@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 238" role="img" aria-label="Eko, mascote do EcoCiente">
+  <defs>
+    <linearGradient id="corpo" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#faf9de"/><stop offset=".55" stop-color="#e7ecd0"/><stop offset="1" stop-color="#b2c295"/></linearGradient>
+    <linearGradient id="rosto" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fffef2"/><stop offset="1" stop-color="#dce7d5"/></linearGradient>
+    <linearGradient id="folha" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#b7e58b"/><stop offset=".48" stop-color="#75bb5d"/><stop offset="1" stop-color="#327e39"/></linearGradient>
+    <linearGradient id="membros" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#a4d776"/><stop offset=".6" stop-color="#59a849"/><stop offset="1" stop-color="#2b7436"/></linearGradient>
+    <radialGradient id="olhos" cx=".4" cy=".3" r=".78"><stop stop-color="#5aa4dc"/><stop offset=".38" stop-color="#2365a2"/><stop offset=".82" stop-color="#172b58"/><stop offset="1" stop-color="#0a203f"/></radialGradient>
+    <radialGradient id="corar"><stop stop-color="#ef9fb2" stop-opacity=".9"/><stop offset="1" stop-color="#edacb5" stop-opacity=".45"/></radialGradient>
+    <filter id="sombra" x="-30%" y="-35%" width="160%" height="180%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0a3d2b" flood-opacity=".18"/></filter>
+  </defs>
+  <g filter="url(#sombra)">
+    <path d="M105 73Q97 44 105 32Q115 28 118 39Q112 54 116 75" fill="#8e6848"/>
+    <path d="M108 41Q76 9 35 24Q39 54 79 61Q101 63 108 41Z" fill="url(#folha)" stroke="#72aa58" stroke-width="2"/>
+    <path d="M111 44Q136 3 190 15Q180 53 128 65Q112 63 111 44Z" fill="url(#folha)" stroke="#72aa58" stroke-width="2"/>
+    <path d="M105 44Q82 33 55 33M113 48Q139 30 169 24" stroke="#dbf6c5" stroke-width="2" stroke-linecap="round" opacity=".65"/>
+    <ellipse cx="40" cy="156" rx="19" ry="33" transform="rotate(16 40 156)" fill="url(#membros)"/>
+    <ellipse cx="181" cy="157" rx="19" ry="33" transform="rotate(-14 181 157)" fill="url(#membros)"/>
+    <ellipse cx="50" cy="165" rx="11" ry="14" transform="rotate(-25 50 165)" fill="#82c35f"/>
+    <ellipse cx="171" cy="166" rx="11" ry="14" transform="rotate(25 171 166)" fill="#82c35f"/>
+    <ellipse cx="77" cy="211" rx="21" ry="32" transform="rotate(42 77 211)" fill="url(#membros)"/>
+    <ellipse cx="150" cy="212" rx="21" ry="32" transform="rotate(-42 150 212)" fill="url(#membros)"/>
+    <rect x="42" y="70" width="138" height="143" rx="44" fill="url(#corpo)" stroke="#a2b88e" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="56" y="84" width="111" height="113" rx="39" fill="url(#rosto)" stroke="#e1e8d4" stroke-width="2"/>
+    <ellipse cx="91" cy="134" rx="13" ry="27" fill="url(#olhos)" stroke="#223e58" stroke-width="3"/>
+    <ellipse cx="136" cy="134" rx="13" ry="27" fill="url(#olhos)" stroke="#223e58" stroke-width="3"/>
+    <ellipse cx="87" cy="124" rx="5.8" ry="11.5" fill="#fff" opacity=".96" transform="rotate(7 87 124)"/>
+    <ellipse cx="132" cy="124" rx="5.8" ry="11.5" fill="#fff" opacity=".96" transform="rotate(7 132 124)"/>
+    <ellipse cx="70" cy="160" rx="13" ry="8" fill="url(#corar)"/>
+    <ellipse cx="156" cy="160" rx="13" ry="8" fill="url(#corar)"/>
+    <path d="M66 93Q105 72 158 91" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".45"/>
+  </g>
+</svg>
