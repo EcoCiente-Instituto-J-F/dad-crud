@@ -2,73 +2,79 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
 
 const frases = [
-  "Oi! Que bom ter você por aqui! 🌱",
-  "Pequenas atitudes fazem um mundo melhor!",
-  "Vamos cultivar boas ideias hoje?",
-  "Você faz a diferença, sabia? 💚",
+  "Oi! Que bom te ver por aqui! 🌱",
+  "Cada coleta é um carinho com o planeta!",
+  "Vamos cultivar boas ideias hoje? 💚",
+  "Você faz a diferença, sabia?",
   "Um planeta melhor começa com a gente!",
-  "Seu trabalho ajuda a transformar o futuro.",
-  "Cada coleta é um passo por um mundo mais verde!",
-  "Continue espalhando sustentabilidade!",
-  "Hoje é um ótimo dia para fazer o bem!",
   "A natureza agradece seu cuidado! 🌿",
+  "Seu trabalho transforma o futuro!",
   "Juntos, fazemos o EcoCiente crescer!",
-  "Reciclar é um carinho com o planeta!",
+  "Pequenas atitudes geram grandes mudanças!",
+  "Continue espalhando sustentabilidade!",
 ];
+
+const gif = "/acessibilidade/eko/eko-animado.gif";
+const imagem = "/acessibilidade/eko/eko-hover.png";
+const reserva = "/eko-mascote.svg";
 
 type Posicao = { x: number; y: number };
 type Arraste = {
   id: number;
+  inicialX: number;
+  inicialY: number;
   x: number;
   y: number;
-  inicioX: number;
-  inicioY: number;
   moveu: boolean;
 };
 
-function limitar(valor: number, minimo: number, maximo: number): number {
-  return Math.max(minimo, Math.min(valor, maximo));
+function limitar(numero: number, minimo: number, maximo: number): number {
+  return Math.max(minimo, Math.min(numero, maximo));
 }
 
 function posicaoInicial(): Posicao {
   return {
-    x: Math.max(12, window.innerWidth - 165),
-    y: Math.max(12, window.innerHeight - 190),
+    x: Math.max(12, window.innerWidth - 180),
+    y: Math.max(12, window.innerHeight - 204),
   };
 }
 
 export default function MascoteEko() {
   const [posicao, setPosicao] = useState<Posicao>(posicaoInicial);
   const [frase, setFrase] = useState(frases[0]);
-  const [mostrarMensagem, setMostrarMensagem] = useState(false);
+  const [visivel, setVisivel] = useState(false);
+  const [arrastando, setArrastando] = useState(false);
   const arraste = useRef<Arraste | null>(null);
-  const ignorarClique = useRef(false);
+  const evitarClique = useRef(false);
 
   useEffect(() => {
-    const ajustar = () => {
-      setPosicao((anterior) => ({
-        x: limitar(anterior.x, 12, Math.max(12, window.innerWidth - 140)),
-        y: limitar(anterior.y, 12, Math.max(12, window.innerHeight - 155)),
-      }));
-    };
+    const ajustar = () => setPosicao((atual) => ({
+      x: limitar(atual.x, 12, Math.max(12, window.innerWidth - 150)),
+      y: limitar(atual.y, 12, Math.max(12, window.innerHeight - 175)),
+    }));
     window.addEventListener("resize", ajustar);
     return () => window.removeEventListener("resize", ajustar);
   }, []);
 
-  function sortearFrase() {
-    const possibilidades = frases.filter((item) => item !== frase);
-    setFrase(possibilidades[Math.floor(Math.random() * possibilidades.length)]);
+  function sortear() {
+    const opcoes = frases.filter((texto) => texto !== frase);
+    setFrase(opcoes[Math.floor(Math.random() * opcoes.length)]);
   }
 
-  function iniciarArraste(evento: PointerEvent<HTMLButtonElement>) {
-    if (evento.button !== 0) return;
+  function apontar() {
+    if (arrastando) return;
+    sortear();
+    setVisivel(true);
+  }
 
+  function iniciar(evento: PointerEvent<HTMLButtonElement>) {
+    if (evento.button !== 0) return;
     arraste.current = {
       id: evento.pointerId,
+      inicialX: evento.clientX,
+      inicialY: evento.clientY,
       x: posicao.x,
       y: posicao.y,
-      inicioX: evento.clientX,
-      inicioY: evento.clientY,
       moveu: false,
     };
     evento.currentTarget.setPointerCapture(evento.pointerId);
@@ -78,88 +84,112 @@ export default function MascoteEko() {
     const dados = arraste.current;
     if (!dados || dados.id !== evento.pointerId) return;
 
-    const diferencaX = evento.clientX - dados.inicioX;
-    const diferencaY = evento.clientY - dados.inicioY;
+    const deslocamentoX = evento.clientX - dados.inicialX;
+    const deslocamentoY = evento.clientY - dados.inicialY;
 
-    if (Math.abs(diferencaX) + Math.abs(diferencaY) > 7) {
+    if (Math.abs(deslocamentoX) + Math.abs(deslocamentoY) > 7) {
       dados.moveu = true;
-      setMostrarMensagem(false);
+      setArrastando(true);
+      setVisivel(false);
     }
 
-    if (!dados.moveu) return;
-
-    setPosicao({
-      x: limitar(dados.x + diferencaX, 12, Math.max(12, window.innerWidth - 140)),
-      y: limitar(dados.y + diferencaY, 12, Math.max(12, window.innerHeight - 155)),
-    });
+    if (dados.moveu) {
+      setPosicao({
+        x: limitar(dados.x + deslocamentoX, 12, Math.max(12, window.innerWidth - 150)),
+        y: limitar(dados.y + deslocamentoY, 12, Math.max(12, window.innerHeight - 175)),
+      });
+    }
   }
 
-  function finalizar(evento: PointerEvent<HTMLButtonElement>) {
-    if (!arraste.current || arraste.current.id !== evento.pointerId) return;
-    ignorarClique.current = arraste.current.moveu;
+  function terminar(evento: PointerEvent<HTMLButtonElement>) {
+    if (arraste.current?.id !== evento.pointerId) return;
+    evitarClique.current = arraste.current.moveu;
     arraste.current = null;
+    setArrastando(false);
+
     if (evento.currentTarget.hasPointerCapture(evento.pointerId)) {
       evento.currentTarget.releasePointerCapture(evento.pointerId);
     }
   }
 
-  function moverPorTeclado(evento: KeyboardEvent<HTMLButtonElement>) {
-    const deslocamentos: Record<string, Posicao> = {
+  function moverTeclado(evento: KeyboardEvent<HTMLButtonElement>) {
+    const movimentos: Record<string, Posicao> = {
       ArrowUp: { x: 0, y: -20 },
       ArrowDown: { x: 0, y: 20 },
       ArrowLeft: { x: -20, y: 0 },
       ArrowRight: { x: 20, y: 0 },
     };
+
     if (evento.key === "Home") {
       evento.preventDefault();
       setPosicao(posicaoInicial());
       return;
     }
-    const deslocamento = deslocamentos[evento.key];
-    if (!deslocamento) return;
 
+    const deslocamento = movimentos[evento.key];
+    if (!deslocamento) return;
     evento.preventDefault();
     setPosicao((atual) => ({
-      x: limitar(atual.x + deslocamento.x, 12, Math.max(12, window.innerWidth - 140)),
-      y: limitar(atual.y + deslocamento.y, 12, Math.max(12, window.innerHeight - 155)),
+      x: limitar(atual.x + deslocamento.x, 12, Math.max(12, window.innerWidth - 150)),
+      y: limitar(atual.y + deslocamento.y, 12, Math.max(12, window.innerHeight - 175)),
     }));
   }
 
   return (
     <div
-      className="eko-flutuante"
+      className={"eko-flutuante" + (arrastando ? " eko-flutuante--arrastando" : "")}
       style={{ left: posicao.x, top: posicao.y }}
-      onMouseEnter={sortearFrase}
-      onMouseLeave={() => setMostrarMensagem(false)}
+      onMouseEnter={apontar}
+      onMouseLeave={() => setVisivel(false)}
     >
-      <span
-        id="eko-mensagem"
+      <div
+        id="eko-balao"
+        className={"eko-flutuante__balao" + (visivel && !arrastando ? " eko-flutuante__balao--ativo" : "")}
         role="tooltip"
-        className={"eko-flutuante__balao" + (mostrarMensagem ? " eko-flutuante__balao--ativo" : "")}
+        aria-hidden={!visivel}
       >
-        {frase}
-      </span>
+        <img src="/acessibilidade/eko/balao.svg" alt="" aria-hidden="true" />
+        <span>{frase}</span>
+      </div>
       <button
         type="button"
         className="eko-flutuante__botao"
-        aria-label="Eko, mascote do EcoCiente. Pressione Enter para ver uma frase. Use as setas para mover e Home para reposicionar."
-        aria-describedby="eko-mensagem"
-        onPointerDown={iniciarArraste}
+        aria-label="Eko, mascote EcoCiente. Pressione Enter para ver uma frase. Use as setas para mover e Home para voltar ao canto."
+        aria-describedby={visivel ? "eko-balao" : undefined}
+        onPointerDown={iniciar}
         onPointerMove={mover}
-        onPointerUp={finalizar}
-        onPointerCancel={finalizar}
-        onKeyDown={moverPorTeclado}
-        onFocus={sortearFrase}
+        onPointerUp={terminar}
+        onPointerCancel={terminar}
+        onFocus={apontar}
+        onBlur={() => setVisivel(false)}
+        onKeyDown={moverTeclado}
         onClick={() => {
-          if (ignorarClique.current) {
-            ignorarClique.current = false;
+          if (evitarClique.current) {
+            evitarClique.current = false;
             return;
           }
-          sortearFrase();
-          setMostrarMensagem((anterior) => !anterior);
+          sortear();
+          setVisivel(true);
         }}
       >
-        <img className="eko-mascote-imagem" src="/eko-mascote.svg" alt="" draggable={false} />
+        <img
+          className="eko-flutuante__gif eko-mascote-imagem"
+          src={gif}
+          alt=""
+          draggable={false}
+          onError={(evento) => {
+            if (!evento.currentTarget.src.endsWith(reserva)) evento.currentTarget.src = reserva;
+          }}
+        />
+        <img
+          className="eko-flutuante__imagem eko-mascote-imagem"
+          src={imagem}
+          alt=""
+          draggable={false}
+          onError={(evento) => {
+            if (!evento.currentTarget.src.endsWith(reserva)) evento.currentTarget.src = reserva;
+          }}
+        />
       </button>
     </div>
   );

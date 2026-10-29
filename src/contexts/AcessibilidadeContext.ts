@@ -21,6 +21,8 @@ export interface PreferenciasAcessibilidade {
   pausarAnimacoes: boolean;
   escalaCinza: boolean;
   contraste: ContrasteAcessivel;
+  nivelSaturacao: NivelEspacamento;
+  modoDaltonico: NivelEspacamento;
 }
 
 export interface AcessibilidadeContexto {

@@ -22,6 +22,8 @@ const preferenciasPadrao: PreferenciasAcessibilidade = {
   pausarAnimacoes: false,
   escalaCinza: false,
   contraste: "padrao",
+  nivelSaturacao: 0,
+  modoDaltonico: 0,
 };
 
 type Acao =
@@ -58,6 +60,10 @@ function validarPreferencias(valor: unknown): PreferenciasAcessibilidade {
     escalaCinza: booleano("escalaCinza"),
     contraste: (["padrao", "claro", "escuro"] as readonly unknown[]).includes(dados.contraste)
       ? dados.contraste as PreferenciasAcessibilidade["contraste"] : "padrao",
+    nivelSaturacao: ([0, 1, 2, 3] as readonly unknown[]).includes(dados.nivelSaturacao)
+      ? dados.nivelSaturacao as PreferenciasAcessibilidade["nivelSaturacao"] : 0,
+    modoDaltonico: ([0, 1, 2, 3] as readonly unknown[]).includes(dados.modoDaltonico)
+      ? dados.modoDaltonico as PreferenciasAcessibilidade["modoDaltonico"] : 0,
   };
 }
 
@@ -106,6 +112,8 @@ export default function AcessibilidadeProvider({ children }: { children: ReactNo
     raiz.dataset.ecoEsconderDecorativas = String(preferencias.esconderDecorativas);
     raiz.dataset.ecoPausarAnimacoes = String(preferencias.pausarAnimacoes);
     raiz.dataset.ecoEscalaCinza = String(preferencias.escalaCinza);
+    raiz.dataset.ecoSaturacao = String(preferencias.nivelSaturacao);
+    raiz.dataset.ecoDaltonico = String(preferencias.modoDaltonico);
     raiz.style.setProperty("--eco-fator-fonte", String(preferencias.escalaFonte));
     raiz.style.setProperty("--eco-espaco-linhas", ["normal", "1.6", "1.85", "2.1"][preferencias.linhas]);
     raiz.style.setProperty("--eco-espaco-letras", ["normal", "0.025em", "0.06em", "0.1em"][preferencias.letras]);

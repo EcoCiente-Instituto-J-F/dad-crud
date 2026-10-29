@@ -748,3 +748,19 @@ html[data-eco-pausar-animacoes="true"] *::after {
     white-space: normal;
   }
 }
+
+/* Eko: GIF no estado padrão, imagem estática e balão-imagem no hover. */
+.eko-flutuante__botao {position:relative;}
+.eko-flutuante__gif,.eko-flutuante__imagem {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 280ms ease,transform 350ms ease;}
+.eko-flutuante__gif {opacity:1;}
+.eko-flutuante__imagem {opacity:0;transform:scale(.94);}
+.eko-flutuante:hover .eko-flutuante__gif,.eko-flutuante:focus-within .eko-flutuante__gif {opacity:0;transform:scale(1.06);}
+.eko-flutuante:hover .eko-flutuante__imagem,.eko-flutuante:focus-within .eko-flutuante__imagem {opacity:1;transform:scale(1);}
+.eko-flutuante__balao {right:70px;bottom:126px;width:220px;max-width:none;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;display:grid;place-items:center;opacity:0;visibility:hidden;transform:translateY(7px);pointer-events:none;}
+.eko-flutuante__balao img {width:100%;height:auto;display:block;}
+.eko-flutuante__balao span {position:absolute;inset:12px 13px 18px;display:grid;place-items:center;padding:3px 5px;color:#064e3b;font-size:12px;font-weight:800;line-height:1.28;text-align:center;}
+.eko-flutuante:hover .eko-flutuante__balao,.eko-flutuante:focus-within .eko-flutuante__balao,.eko-flutuante__balao--ativo {opacity:1;visibility:visible;transform:translateY(0);}
+.eko-flutuante--arrastando .eko-flutuante__balao {opacity:0!important;visibility:hidden!important;}
+.eko-flutuante--arrastando .eko-flutuante__gif {opacity:1!important;}
+.eko-flutuante--arrastando .eko-flutuante__imagem {opacity:0!important;}
+@media (prefers-reduced-motion:reduce) {.eko-flutuante__gif,.eko-flutuante__imagem,.eko-flutuante__balao {transition:none!important;}}

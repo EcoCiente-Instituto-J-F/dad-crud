@@ -1,440 +1,434 @@
-import { useEffect, useId, useRef, useState } from "react";
-import type { KeyboardEvent } from "react";
-import {
-  Accessibility, ALargeSmall, BookOpen, Check, Contrast, Eye,
-  EyeOff, Focus, Heading, Highlighter, Languages, Link2,
-  Maximize2, Minimize2, Moon, MousePointer2, Pause,
-  RotateCcw, ScanText, Type, Volume2, X,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { PointerEvent } from "react";
 import { useLocation } from "react-router-dom";
-
-import Modal from "../Modal";
+import { Maximize2, Minimize2, X } from "lucide-react";
 import { useAcessibilidade } from "../../hooks/useAcessibilidade";
 import { useVLibras } from "../../hooks/useVLibras";
 import type {
-  ContrasteAcessivel, EscalaFonte, FonteAcessivel, NivelEspacamento,
+  ContrasteAcessivel,
+  EscalaFonte,
+  FonteAcessivel,
+  NivelEspacamento,
 } from "../../contexts/AcessibilidadeContext";
 
-type Aba = "texto" | "leitura" | "cores" | "libras";
-
-const abas: readonly { id: Aba; titulo: string; icone: LucideIcon }[] = [
-  { id: "texto", titulo: "Texto", icone: Type },
-  { id: "leitura", titulo: "Leitura", icone: BookOpen },
-  { id: "cores", titulo: "Cores", icone: Contrast },
-  { id: "libras", titulo: "Libras", icone: Languages },
-];
-
-function CardRecurso({
-  titulo, descricao, icone: Icone, ativo, onClick,
-}: {
+type CartaoProps = {
+  codigo: string;
   titulo: string;
-  descricao: string;
-  icone: LucideIcon;
+  estado: string;
   ativo: boolean;
+  nivel?: number;
   onClick: () => void;
-}) {
+};
+
+type Arraste = {
+  id: number;
+  inicioX: number;
+  inicioY: number;
+  esquerda: number;
+  topo: number;
+};
+
+const escalas: readonly EscalaFonte[] = [1, 1.125, 1.25, 1.375];
+const fontes: readonly FonteAcessivel[] = ["padrao", "arial", "verdana", "georgia"];
+const nomesFonte = ["Original", "112%", "125%", "138%"];
+const nomesTexto = ["Original", "Arial", "Verdana", "Georgia"];
+const nomesEspacamento = ["Original", "Médio", "Grande", "Muito grande"];
+const nomesSaturacao = ["Original", "Baixa", "Alta", "Escala de cinza"];
+const nomesDaltonismo = ["Desativado", "Protanopia", "Deuteranopia", "Tritanopia"];
+const icones = "/acessibilidade/icones/";
+
+function CartaoRecurso({ codigo, titulo, estado, ativo, nivel, onClick }: CartaoProps) {
   return (
     <button
       type="button"
-      className={"eco-recurso" + (ativo ? " eco-recurso--ativo" : "")}
+      className="eco-a11y-card"
       aria-pressed={ativo}
+      aria-label={titulo + ". " + estado + (nivel !== undefined ? ". Clique para mudar de nível." : ". Clique para alternar.")}
       onClick={onClick}
     >
-      <Icone size={22} aria-hidden="true" />
+      <span className="eco-a11y-card__imagem" aria-hidden="true">
+        <img src={icones + codigo + ".svg"} alt="" />
+      </span>
       <strong>{titulo}</strong>
-      <span>{descricao}</span>
-      {ativo && <Check size={17} className="eco-recurso__check" aria-hidden="true" />}
+      <span className="eco-a11y-card__estado">{estado}</span>
+      {nivel !== undefined && (
+        <span className="eco-a11y-card__niveis" aria-hidden="true">
+          {[1, 2, 3].map((numero) => (
+            <i key={numero} className={numero <= nivel ? "ativo" : ""} />
+          ))}
+        </span>
+      )}
     </button>
+  );
+}
+
+function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <section className="eco-a11y-secao">
+      <h3>{titulo}</h3>
+      <div className="eco-a11y-grade">{children}</div>
+    </section>
   );
 }
 
 export default function PainelAcessibilidade() {
   const { preferencias: p, atualizar, restaurar } = useAcessibilidade();
-  const { estado: estadoLibras, ativar: ativarLibras } = useVLibras();
+  const { estado: librasEstado, ativar: ativarLibras } = useVLibras();
   const [aberto, setAberto] = useState(false);
-  const [expandido, setExpandido] = useState(false);
-  const [aba, setAba] = useState<Aba>("texto");
-  const [confirmarReset, setConfirmarReset] = useState(false);
-  const [mensagem, setMensagem] = useState("");
+  const [ampliado, setAmpliado] = useState(false);
+  const [guia, setGuia] = useState(false);
   const [lendo, setLendo] = useState(false);
-  const id = useId();
+  const [aviso, setAviso] = useState("");
+  const [posicao, setPosicao] = useState<{ x: number; y: number } | null>(null);
+  const arraste = useRef<Arraste | null>(null);
+  const painelRef = useRef<HTMLElement>(null);
   const botaoAbrir = useRef<HTMLButtonElement>(null);
   const botaoFechar = useRef<HTMLButtonElement>(null);
-  const listaAbas = useRef<HTMLDivElement>(null);
+  const id = useId();
   const rota = useLocation();
+
+  const fechar = useCallback(() => setAberto(false), []);
+  const abrir = useCallback(() => setAberto(true), []);
+  const anunciar = useCallback((mensagem: string) => setAviso(mensagem), []);
 
   useEffect(() => {
     if (!aberto) return;
 
+    const focoAnterior = document.activeElement instanceof HTMLElement
+      ? document.activeElement : botaoAbrir.current;
     botaoFechar.current?.focus();
-    const tecla = (evento: globalThis.KeyboardEvent) => {
-      if (evento.key === "Escape" && !document.querySelector("dialog[open]")) {
+
+    const fecharComTecla = (evento: KeyboardEvent) => {
+      if (evento.key === "Escape") {
         evento.preventDefault();
-        setAberto(false);
+        fechar();
       }
     };
-    document.addEventListener("keydown", tecla);
-
+    document.addEventListener("keydown", fecharComTecla);
     return () => {
-      document.removeEventListener("keydown", tecla);
-      botaoAbrir.current?.focus();
+      document.removeEventListener("keydown", fecharComTecla);
+      if (focoAnterior?.isConnected) focoAnterior.focus();
     };
-  }, [aberto]);
+  }, [aberto, fechar]);
 
   useEffect(() => {
     window.speechSynthesis?.cancel();
     setLendo(false);
   }, [rota.pathname]);
 
+  useEffect(() => {
+    const atalho = (evento: KeyboardEvent) => {
+      if (!evento.shiftKey || evento.altKey || evento.ctrlKey || evento.metaKey) return;
+      const alvo = evento.target;
+      if (
+        alvo instanceof HTMLInputElement ||
+        alvo instanceof HTMLTextAreaElement ||
+        alvo instanceof HTMLSelectElement ||
+        (alvo instanceof HTMLElement && alvo.isContentEditable)
+      ) return;
+
+      const tecla = evento.key.toLowerCase();
+      if (tecla === "a") {
+        evento.preventDefault();
+        setAberto((anterior) => !anterior);
+      } else if (tecla === "l") {
+        evento.preventDefault();
+        ativarLibras();
+      } else if (tecla === "p") {
+        const campo = document.querySelector<HTMLInputElement>('input[type="search"]');
+        if (campo) {
+          evento.preventDefault();
+          campo.focus();
+          campo.select();
+        }
+      }
+    };
+    document.addEventListener("keydown", atalho);
+    return () => document.removeEventListener("keydown", atalho);
+  }, [ativarLibras]);
+
+  function ciclarFonte() {
+    const proximo = (escalas.indexOf(p.escalaFonte) + 1) % escalas.length;
+    atualizar("escalaFonte", escalas[proximo]);
+    anunciar("Tamanho da fonte: " + nomesFonte[proximo] + ".");
+  }
+
+  function ciclarEstilo() {
+    const proximo = (fontes.indexOf(p.fonte) + 1) % fontes.length;
+    atualizar("fonte", fontes[proximo]);
+    anunciar("Estilo de texto: " + nomesTexto[proximo] + ".");
+  }
+
+  function ciclarNivel(
+    campo: "linhas" | "letras" | "nivelSaturacao" | "modoDaltonico",
+    rotulos: readonly string[],
+    nome: string,
+  ) {
+    const proximo = ((p[campo] + 1) % 4) as NivelEspacamento;
+    atualizar(campo, proximo);
+    anunciar(nome + ": " + rotulos[proximo] + ".");
+  }
+
+  function alternar(
+    campo:
+      | "letrasDestacadas" | "destacarLinks" | "destacarTitulos"
+      | "mascaraLeitura" | "guiaLeitura" | "lupaTexto"
+      | "esconderDecorativas" | "pausarAnimacoes",
+    nome: string,
+  ) {
+    const proximo = !p[campo];
+    atualizar(campo, proximo);
+    anunciar(nome + (proximo ? " ativado." : " desativado."));
+  }
+
+  function ciclarContraste() {
+    const opcoes: readonly ContrasteAcessivel[] = ["padrao", "escuro", "claro"];
+    const proximo = opcoes[(opcoes.indexOf(p.contraste) + 1) % opcoes.length];
+    atualizar("contraste", proximo);
+    anunciar("Contraste: " + ({ padrao: "Original", escuro: "Escuro", claro: "Claro" }[proximo]) + ".");
+  }
+
   function alternarLeitura() {
     if (lendo) {
       window.speechSynthesis?.cancel();
       setLendo(false);
-      setMensagem("Leitura interrompida.");
+      anunciar("Leitura interrompida.");
       return;
     }
-
     if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
-      setMensagem("Este navegador não oferece leitura em voz alta.");
+      anunciar("Seu navegador não oferece leitura em voz alta.");
       return;
     }
 
-    const texto = document.querySelector<HTMLElement>("main.conteudo")?.innerText.trim() ?? "";
+    const principal = document.querySelector<HTMLElement>("main.conteudo");
+    if (!principal) {
+      anunciar("Conteúdo da página não encontrado.");
+      return;
+    }
+    const copia = principal.cloneNode(true) as HTMLElement;
+    copia.querySelectorAll("button, input, textarea, select, script, style, [aria-hidden='true']").forEach((elemento) => elemento.remove());
+    const texto = (copia.textContent ?? "").replace(/\s+/g, " ").trim();
     if (!texto) {
-      setMensagem("Não há conteúdo disponível para ler nesta página.");
+      anunciar("Não há texto disponível para leitura.");
       return;
     }
-
-    const fala = new SpeechSynthesisUtterance(texto.slice(0, 4500));
+    const fala = new SpeechSynthesisUtterance(texto.slice(0, 12000));
     fala.lang = "pt-BR";
-    fala.rate = 0.95;
+    fala.rate = 1;
     fala.onend = () => setLendo(false);
     fala.onerror = () => {
       setLendo(false);
-      setMensagem("A leitura em voz alta foi interrompida pelo navegador.");
+      anunciar("A leitura foi interrompida ou não está disponível.");
     };
-
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(fala);
     setLendo(true);
-    setMensagem("Lendo o conteúdo da página. Você pode interromper a qualquer momento.");
+    anunciar("Leitura iniciada. Ative novamente para interromper.");
   }
 
-  function navegarAbas(evento: KeyboardEvent<HTMLButtonElement>, atual: Aba) {
-    const indice = abas.findIndex((item) => item.id === atual);
-    let proximo = indice;
-
-    if (evento.key === "ArrowRight") proximo = (indice + 1) % abas.length;
-    else if (evento.key === "ArrowLeft") proximo = (indice + abas.length - 1) % abas.length;
-    else if (evento.key === "Home") proximo = 0;
-    else if (evento.key === "End") proximo = abas.length - 1;
-    else return;
-
-    evento.preventDefault();
-    setAba(abas[proximo].id);
-    listaAbas.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[proximo]?.focus();
+  function abrirLibras() {
+    ativarLibras();
+    anunciar(librasEstado === "pronto" ? "Alternando tradutor de Libras." : "Carregando tradutor de Libras...");
   }
 
-  function definirEscala(valor: EscalaFonte) {
-    atualizar("escalaFonte", valor);
-    setMensagem("Tamanho do texto ajustado para " + Math.round(valor * 100) + "%.");
+  function iniciarArraste(evento: PointerEvent<HTMLElement>) {
+    if (evento.button !== 0 || (evento.target instanceof HTMLElement && evento.target.closest("button"))) {
+      return;
+    }
+    const retangulo = painelRef.current?.getBoundingClientRect();
+    if (!retangulo) return;
+
+    arraste.current = {
+      id: evento.pointerId,
+      inicioX: evento.clientX,
+      inicioY: evento.clientY,
+      esquerda: retangulo.left,
+      topo: retangulo.top,
+    };
+    evento.currentTarget.setPointerCapture(evento.pointerId);
   }
 
-  function definirContraste(valor: ContrasteAcessivel) {
-    atualizar("contraste", valor);
-    setMensagem(valor === "padrao" ? "Contraste padrão restaurado." : "Contraste ajustado.");
+  function moverPainel(evento: PointerEvent<HTMLElement>) {
+    const dados = arraste.current;
+    if (!dados || dados.id !== evento.pointerId) return;
+    const largura = painelRef.current?.offsetWidth ?? 500;
+    const altura = painelRef.current?.offsetHeight ?? 690;
+    setPosicao({
+      x: Math.max(8, Math.min(window.innerWidth - largura - 8, dados.esquerda + evento.clientX - dados.inicioX)),
+      y: Math.max(8, Math.min(window.innerHeight - altura - 8, dados.topo + evento.clientY - dados.inicioY)),
+    });
   }
 
-  const tituloAba = abas.find((item) => item.id === aba)?.titulo ?? "Recursos";
+  function terminarArraste(evento: PointerEvent<HTMLElement>) {
+    if (arraste.current?.id !== evento.pointerId) return;
+    arraste.current = null;
+    if (evento.currentTarget.hasPointerCapture(evento.pointerId)) {
+      evento.currentTarget.releasePointerCapture(evento.pointerId);
+    }
+  }
+
+  const rotuloContraste = p.contraste === "padrao" ? "Desativado" : p.contraste === "escuro" ? "Escuro" : "Claro";
+  const booleano = (ativo: boolean) => ativo ? "Ativado" : "Desativado";
 
   return (
-    <>
-      <div className="eco-atalho-acessibilidade">
+    <div className="eco-a11y-raiz">
+      <nav className="eco-a11y-atalhos" aria-label="Atalhos de acessibilidade">
         <button
           ref={botaoAbrir}
           type="button"
-          className="eco-atalho-acessibilidade__botao"
-          aria-label={aberto ? "Fechar painel de acessibilidade" : "Abrir painel de acessibilidade"}
+          className="eco-a11y-atalho"
+          aria-label={aberto ? "Fechar recursos assistivos" : "Abrir recursos assistivos"}
           aria-controls={id + "-painel"}
           aria-expanded={aberto}
           onClick={() => setAberto((anterior) => !anterior)}
         >
-          <Accessibility size={27} aria-hidden="true" />
-          <span className="somente-leitor">Recursos de acessibilidade</span>
+          <span className="eco-a11y-atalho__icone" aria-hidden="true">
+            <img src={icones + "botao-acessibilidade.svg"} alt="" />
+          </span>
+          <span className="eco-a11y-atalho__nome">Recursos assistivos</span>
         </button>
-        {!aberto && <span className="eco-atalho-acessibilidade__dica" aria-hidden="true">Acessibilidade</span>}
-      </div>
-
-      <section
-        id={id + "-painel"}
-        className={"eco-painel-acessibilidade" + (expandido ? " eco-painel-acessibilidade--ampliado" : "")}
-        aria-label="Painel de acessibilidade"
-        hidden={!aberto}
-      >
-        <div className="eco-painel-acessibilidade__cabecalho">
-          <span className="eco-painel-acessibilidade__icone"><Accessibility size={23} aria-hidden="true" /></span>
-          <div>
-            <h2>Recursos assistivos</h2>
-            <p>Personalize sua experiência no EcoCiente.</p>
-          </div>
-          <button
-            type="button"
-            className="eco-painel-acessibilidade__controle"
-            aria-label={expandido ? "Reduzir painel" : "Ampliar painel"}
-            title={expandido ? "Reduzir painel" : "Ampliar painel"}
-            onClick={() => setExpandido((anterior) => !anterior)}
-          >
-            {expandido ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-          </button>
-          <button
-            ref={botaoFechar}
-            type="button"
-            className="eco-painel-acessibilidade__controle"
-            aria-label="Fechar painel de acessibilidade"
-            onClick={() => setAberto(false)}
-          >
-            <X size={19} aria-hidden="true" />
-          </button>
-        </div>
-
-        <div className="eco-painel-acessibilidade__abas" ref={listaAbas} role="tablist" aria-label="Categorias de recursos">
-          {abas.map((item) => {
-            const Icone = item.icone;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                id={id + "-aba-" + item.id}
-                role="tab"
-                aria-selected={aba === item.id}
-                aria-controls={id + "-conteudo"}
-                tabIndex={aba === item.id ? 0 : -1}
-                onKeyDown={(evento) => navegarAbas(evento, item.id)}
-                onClick={() => setAba(item.id)}
-              >
-                <Icone size={17} aria-hidden="true" />
-                {item.titulo}
-              </button>
-            );
-          })}
-        </div>
-
-        <div
-          className="eco-painel-acessibilidade__corpo"
-          role="tabpanel"
-          id={id + "-conteudo"}
-          aria-labelledby={id + "-aba-" + aba}
-          tabIndex={0}
+        <button
+          type="button"
+          className="eco-a11y-atalho"
+          aria-label="Abrir ou fechar tradução para Libras"
+          onClick={abrirLibras}
         >
-          <h3>{tituloAba}</h3>
+          <span className="eco-a11y-atalho__icone" aria-hidden="true">
+            <img src={icones + "botao-libras.svg"} alt="" />
+          </span>
+          <span className="eco-a11y-atalho__nome">Acessível em Libras</span>
+        </button>
+      </nav>
 
-          {aba === "texto" && (
-            <div className="eco-painel-acessibilidade__conteudo">
-              <div className="eco-ajuste">
-                <div className="eco-ajuste__titulo">
-                  <ALargeSmall size={21} aria-hidden="true" />
-                  <strong>Tamanho do texto</strong>
-                </div>
-                <div className="eco-ajuste__linha">
-                  <button
-                    type="button"
-                    aria-label="Diminuir tamanho do texto"
-                    disabled={p.escalaFonte === 1}
-                    onClick={() => {
-                      const valores: EscalaFonte[] = [1, 1.125, 1.25, 1.375];
-                      definirEscala(valores[Math.max(0, valores.indexOf(p.escalaFonte) - 1)]);
-                    }}
-                  >A−</button>
-                  <output aria-label="Escala atual da fonte">{Math.round(p.escalaFonte * 100)}%</output>
-                  <button
-                    type="button"
-                    aria-label="Aumentar tamanho do texto"
-                    disabled={p.escalaFonte === 1.375}
-                    onClick={() => {
-                      const valores: EscalaFonte[] = [1, 1.125, 1.25, 1.375];
-                      definirEscala(valores[Math.min(valores.length - 1, valores.indexOf(p.escalaFonte) + 1)]);
-                    }}
-                  >A+</button>
-                </div>
-              </div>
-
-              <div className="eco-ajuste">
-                <label htmlFor={id + "-fonte"}>Estilo de texto</label>
-                <select
-                  id={id + "-fonte"}
-                  value={p.fonte}
-                  onChange={(evento) => atualizar("fonte", evento.target.value as FonteAcessivel)}
-                >
-                  <option value="padrao">Original</option>
-                  <option value="arial">Arial</option>
-                  <option value="verdana">Verdana</option>
-                  <option value="georgia">Georgia</option>
-                </select>
-              </div>
-
-              <div className="eco-ajuste">
-                <span id={id + "-linhas"}>Espaçamento entre linhas</span>
-                <div className="eco-ajuste__opcoes" role="group" aria-labelledby={id + "-linhas"}>
-                  {(["Original", "Médio", "Grande", "Muito grande"] as const).map((rotulo, indice) => (
-                    <button
-                      key={rotulo}
-                      type="button"
-                      aria-pressed={p.linhas === indice}
-                      onClick={() => atualizar("linhas", indice as NivelEspacamento)}
-                    >{rotulo}</button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="eco-ajuste">
-                <span id={id + "-letras"}>Espaçamento entre letras</span>
-                <div className="eco-ajuste__opcoes" role="group" aria-labelledby={id + "-letras"}>
-                  {(["Original", "Médio", "Grande", "Muito grande"] as const).map((rotulo, indice) => (
-                    <button
-                      key={rotulo}
-                      type="button"
-                      aria-pressed={p.letras === indice}
-                      onClick={() => atualizar("letras", indice as NivelEspacamento)}
-                    >{rotulo}</button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="eco-painel-acessibilidade__grade">
-                <CardRecurso
-                  titulo="Letras destacadas"
-                  descricao="Realça a escrita em negrito."
-                  icone={Highlighter}
-                  ativo={p.letrasDestacadas}
-                  onClick={() => atualizar("letrasDestacadas", !p.letrasDestacadas)}
-                />
-                <CardRecurso
-                  titulo="Destacar títulos"
-                  descricao="Facilita localizar seções."
-                  icone={Heading}
-                  ativo={p.destacarTitulos}
-                  onClick={() => atualizar("destacarTitulos", !p.destacarTitulos)}
-                />
-              </div>
-            </div>
-          )}
-
-          {aba === "leitura" && (
-            <div className="eco-painel-acessibilidade__conteudo">
-              <button
-                type="button"
-                className="eco-voz-botao"
-                aria-pressed={lendo}
-                onClick={alternarLeitura}
-              >
-                {lendo ? <Pause size={20} /> : <Volume2 size={20} />}
-                {lendo ? "Parar leitura da página" : "Ler conteúdo da página"}
-              </button>
-              <p className="eco-painel-acessibilidade__nota">
-                Utiliza a voz disponível no seu navegador. Não substitui um leitor de tela.
-              </p>
-              <div className="eco-painel-acessibilidade__grade">
-                <CardRecurso titulo="Guia de leitura" descricao="Acompanha a posição do cursor." icone={Focus} ativo={p.guiaLeitura} onClick={() => atualizar("guiaLeitura", !p.guiaLeitura)} />
-                <CardRecurso titulo="Máscara de leitura" descricao="Atenua o entorno do texto." icone={ScanText} ativo={p.mascaraLeitura} onClick={() => atualizar("mascaraLeitura", !p.mascaraLeitura)} />
-                <CardRecurso titulo="Lupa de texto" descricao="Amplia trechos ao apontar." icone={Eye} ativo={p.lupaTexto} onClick={() => atualizar("lupaTexto", !p.lupaTexto)} />
-                <CardRecurso titulo="Destacar links" descricao="Sublinha os atalhos da página." icone={Link2} ativo={p.destacarLinks} onClick={() => atualizar("destacarLinks", !p.destacarLinks)} />
-                <CardRecurso titulo="Ocultar decoração" descricao="Oculta imagens sem texto alternativo." icone={EyeOff} ativo={p.esconderDecorativas} onClick={() => atualizar("esconderDecorativas", !p.esconderDecorativas)} />
-                <CardRecurso titulo="Pausar animações" descricao="Reduz os movimentos da interface." icone={Pause} ativo={p.pausarAnimacoes} onClick={() => atualizar("pausarAnimacoes", !p.pausarAnimacoes)} />
-              </div>
-            </div>
-          )}
-
-          {aba === "cores" && (
-            <div className="eco-painel-acessibilidade__conteudo">
-              <fieldset className="eco-contraste-opcoes">
-                <legend>Contraste da interface</legend>
-                {([
-                  { valor: "padrao", titulo: "Padrão", icone: Eye },
-                  { valor: "claro", titulo: "Alto contraste claro", icone: Contrast },
-                  { valor: "escuro", titulo: "Alto contraste escuro", icone: Moon },
-                ] as const).map((item) => {
-                  const Icone = item.icone;
-                  return (
-                    <label key={item.valor}>
-                      <input
-                        type="radio"
-                        name={id + "-contraste"}
-                        value={item.valor}
-                        checked={p.contraste === item.valor}
-                        onChange={() => definirContraste(item.valor)}
-                      />
-                      <Icone size={19} aria-hidden="true" />
-                      <span>{item.titulo}</span>
-                    </label>
-                  );
-                })}
-              </fieldset>
-              <div className="eco-painel-acessibilidade__grade">
-                <CardRecurso titulo="Escala de cinza" descricao="Remove as cores da página." icone={Contrast} ativo={p.escalaCinza} onClick={() => atualizar("escalaCinza", !p.escalaCinza)} />
-                <CardRecurso titulo="Destacar links" descricao="Realça a navegação." icone={MousePointer2} ativo={p.destacarLinks} onClick={() => atualizar("destacarLinks", !p.destacarLinks)} />
-              </div>
-              <p className="eco-painel-acessibilidade__nota">
-                Cores e filtros não substituem uma interface que já tenha contraste acessível.
-              </p>
-            </div>
-          )}
-
-          {aba === "libras" && (
-            <div className="eco-painel-acessibilidade__conteudo eco-libras">
-              <Languages size={34} aria-hidden="true" />
-              <h4>Tradução para Libras</h4>
-              <p>O VLibras é um serviço externo. Ele só será carregado quando você solicitar.</p>
-              <button
-                type="button"
-                className="eco-voz-botao"
-                onClick={ativarLibras}
-                disabled={estadoLibras === "carregando"}
-              >
-                <Languages size={19} aria-hidden="true" />
-                {estadoLibras === "carregando" ? "Carregando VLibras..." :
-                  estadoLibras === "pronto" ? "Abrir ou fechar VLibras" : "Ativar VLibras"}
-              </button>
-              <p role="status" aria-live="polite">
-                {estadoLibras === "pronto" ? "VLibras carregado. Use o botão oficial para iniciar a tradução." :
-                  estadoLibras === "erro" ? "Não foi possível carregar o VLibras. Tente novamente." : ""}
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="eco-painel-acessibilidade__rodape">
-          <p role="status" aria-live="polite" className="eco-painel-acessibilidade__status">{mensagem}</p>
-          <button type="button" className="eco-restaurar" onClick={() => setConfirmarReset(true)}>
-            <RotateCcw size={17} aria-hidden="true" />
-            Restaurar configurações
-          </button>
-        </div>
-      </section>
-
-      <Modal
-        aberto={confirmarReset}
-        titulo="Restaurar acessibilidade"
-        onFechar={() => setConfirmarReset(false)}
+      <aside
+        ref={painelRef}
+        id={id + "-painel"}
+        className={"eco-a11y-painel" + (aberto ? " eco-a11y-painel--aberto" : "") + (ampliado ? " eco-a11y-painel--ampliado" : "") + (posicao ? " eco-a11y-painel--arrastado" : "")}
+        aria-labelledby={id + "-titulo"}
+        aria-hidden={!aberto}
+        inert={!aberto}
+        style={posicao ? { left: posicao.x, top: posicao.y, right: "auto" } : undefined}
       >
-        <p>Deseja restaurar todas as preferências de acessibilidade ao padrão?</p>
-        <div className="formulario-acoes">
-          <button type="button" className="botao" onClick={() => setConfirmarReset(false)}>Cancelar</button>
-          <button
-            type="button"
-            className="botao botao--primario"
-            onClick={() => {
-              restaurar();
-              window.speechSynthesis?.cancel();
-              setLendo(false);
-              setConfirmarReset(false);
-              setMensagem("Preferências restauradas com sucesso.");
-            }}
-          >
-            Restaurar
-          </button>
+        <header
+          className="eco-a11y-cabecalho"
+          onPointerDown={iniciarArraste}
+          onPointerMove={moverPainel}
+          onPointerUp={terminarArraste}
+          onPointerCancel={terminarArraste}
+          title="Arraste para mover o painel"
+        >
+          <h2 id={id + "-titulo"}>Recursos assistivos</h2>
+          <div className="eco-a11y-cabecalho__controles">
+            <button
+              type="button"
+              title={ampliado ? "Reduzir painel" : "Ampliar painel"}
+              aria-label={ampliado ? "Reduzir painel" : "Ampliar painel"}
+              className="eco-a11y-fechar"
+              onClick={() => { setAmpliado((valor) => !valor); setPosicao(null); }}
+            >
+              {ampliado ? <Minimize2 size={22} /> : <Maximize2 size={22} />}
+            </button>
+            <button
+              ref={botaoFechar}
+              type="button"
+              className="eco-a11y-fechar"
+              aria-label="Fechar recursos assistivos"
+              onClick={fechar}
+            >
+              <X size={25} aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+        <div className="eco-a11y-conteudo">
+          <p className="eco-a11y-status" role="status" aria-live="polite">{aviso}</p>
+          {guia ? (
+            <section className="eco-a11y-guia">
+              <h3>Como usar os recursos</h3>
+              <p>Clique nos cartões para ativar/desativar ou percorrer níveis. Os indicadores amarelos mostram o nível atual.</p>
+              <p>Você pode usar <kbd>Shift</kbd> + <kbd>A</kbd> para abrir o painel, <kbd>Shift</kbd> + <kbd>L</kbd> para Libras e <kbd>Shift</kbd> + <kbd>P</kbd> para pesquisar.</p>
+              <p>O painel mantém suas preferências neste navegador. A leitura de página depende da voz disponível, e o VLibras é um serviço externo.</p>
+              <button type="button" className="eco-a11y-rodape__acao" onClick={() => setGuia(false)}>
+                Voltar aos recursos
+              </button>
+            </section>
+          ) : (
+            <>
+              <Secao titulo="Libras">
+                <CartaoRecurso codigo="tradutor-libras" titulo="Tradutor de Libras"
+                  estado={librasEstado === "carregando" ? "Carregando..." : librasEstado === "erro" ? "Indisponível" : "Abrir ou fechar"}
+                  ativo={librasEstado === "pronto"} onClick={abrirLibras} />
+              </Secao>
+              <Secao titulo="Controle de fonte">
+                <CartaoRecurso codigo="tamanho-fonte" titulo="Tamanho da fonte"
+                  estado={nomesFonte[escalas.indexOf(p.escalaFonte)]} ativo={p.escalaFonte !== 1}
+                  nivel={escalas.indexOf(p.escalaFonte)} onClick={ciclarFonte} />
+                <CartaoRecurso codigo="estilo-texto" titulo="Estilo de texto"
+                  estado={nomesTexto[fontes.indexOf(p.fonte)]} ativo={p.fonte !== "padrao"}
+                  nivel={fontes.indexOf(p.fonte)} onClick={ciclarEstilo} />
+                <CartaoRecurso codigo="letras-destacadas" titulo="Letras destacadas"
+                  estado={booleano(p.letrasDestacadas)} ativo={p.letrasDestacadas}
+                  onClick={() => alternar("letrasDestacadas", "Letras destacadas")} />
+                <CartaoRecurso codigo="espaco-linhas" titulo="Espaço entre linhas"
+                  estado={nomesEspacamento[p.linhas]} ativo={p.linhas !== 0}
+                  nivel={p.linhas} onClick={() => ciclarNivel("linhas", nomesEspacamento, "Espaço entre linhas")} />
+                <CartaoRecurso codigo="espaco-letras" titulo="Espaço entre letras"
+                  estado={nomesEspacamento[p.letras]} ativo={p.letras !== 0}
+                  nivel={p.letras} onClick={() => ciclarNivel("letras", nomesEspacamento, "Espaço entre letras")} />
+              </Secao>
+              <Secao titulo="Navegação e leitura">
+                <CartaoRecurso codigo="leitor-sites" titulo="Leitor de sites"
+                  estado={lendo ? "Parar leitura" : "Iniciar leitura"}
+                  ativo={lendo} onClick={alternarLeitura} />
+                <CartaoRecurso codigo="mascara-leitura" titulo="Máscara de leitura"
+                  estado={p.mascaraLeitura ? "Ativada" : "Desativada"} ativo={p.mascaraLeitura}
+                  onClick={() => alternar("mascaraLeitura", "Máscara de leitura")} />
+                <CartaoRecurso codigo="guia-leitura" titulo="Guia de leitura"
+                  estado={p.guiaLeitura ? "Ativada" : "Desativada"} ativo={p.guiaLeitura}
+                  onClick={() => alternar("guiaLeitura", "Guia de leitura")} />
+                <CartaoRecurso codigo="destacar-links" titulo="Destacar links"
+                  estado={booleano(p.destacarLinks)} ativo={p.destacarLinks}
+                  onClick={() => alternar("destacarLinks", "Destaque de links")} />
+                <CartaoRecurso codigo="lupa-conteudo" titulo="Lupa de conteúdo"
+                  estado={p.lupaTexto ? "Ativada" : "Desativada"} ativo={p.lupaTexto}
+                  onClick={() => alternar("lupaTexto", "Lupa de conteúdo")} />
+                <CartaoRecurso codigo="destacar-cabecalhos" titulo="Destacar cabeçalhos"
+                  estado={booleano(p.destacarTitulos)} ativo={p.destacarTitulos}
+                  onClick={() => alternar("destacarTitulos", "Destaque de cabeçalhos")} />
+                <CartaoRecurso codigo="esconder-imagens" titulo="Esconder imagens"
+                  estado={booleano(p.esconderDecorativas)} ativo={p.esconderDecorativas}
+                  onClick={() => alternar("esconderDecorativas", "Ocultar imagens decorativas")} />
+                <CartaoRecurso codigo="pausar-animacoes" titulo="Pausar animações"
+                  estado={booleano(p.pausarAnimacoes)} ativo={p.pausarAnimacoes}
+                  onClick={() => alternar("pausarAnimacoes", "Pausar animações")} />
+              </Secao>
+              <Secao titulo="Controle de cor">
+                <CartaoRecurso codigo="contraste" titulo="Contraste de cor" estado={rotuloContraste}
+                  ativo={p.contraste !== "padrao"} onClick={ciclarContraste} />
+                <CartaoRecurso codigo="saturacao" titulo="Saturação"
+                  estado={nomesSaturacao[p.nivelSaturacao]} ativo={p.nivelSaturacao !== 0}
+                  nivel={p.nivelSaturacao} onClick={() => ciclarNivel("nivelSaturacao", nomesSaturacao, "Saturação")} />
+                <CartaoRecurso codigo="modo-daltonico" titulo="Modo daltônico"
+                  estado={nomesDaltonismo[p.modoDaltonico]} ativo={p.modoDaltonico !== 0}
+                  nivel={p.modoDaltonico} onClick={() => ciclarNivel("modoDaltonico", nomesDaltonismo, "Modo daltônico")} />
+              </Secao>
+
+              <footer className="eco-a11y-rodape">
+                <button type="button" className="eco-a11y-rodape__acao" onClick={() => setGuia(true)}>
+                  Conheça os recursos acessíveis
+                </button>
+                <button type="button" className="eco-a11y-rodape__acao eco-a11y-rodape__acao--primaria" onClick={() => {
+                  restaurar();
+                  window.speechSynthesis?.cancel();
+                  setLendo(false);
+                  anunciar("Configurações de acessibilidade restauradas.");
+                }}>
+                  Restaurar configurações
+                </button>
+              </footer>
+            </>
+          )}
         </div>
-      </Modal>
-    </>
+      </aside>
+    </div>
   );
 }
