@@ -9,7 +9,6 @@ import {
   House,
   LogOut,
   Recycle,
-  UserRound,
   UsersRound,
 } from "lucide-react";
 
@@ -28,7 +27,6 @@ const itensMenu: readonly ItemMenu[] = [
   { id: "cooperativas", titulo: "Cooperativas", caminho: "/cooperativas", icone: Recycle },
   { id: "cursos", titulo: "Cursos", caminho: "/cursos", icone: BookOpen },
   { id: "quizzes", titulo: "Quizzes", caminho: "/quizzes", icone: CircleHelp },
-  { id: "perfil", titulo: "Meu perfil", caminho: "/perfil", icone: UserRound },
 ];
 
 export default function Layout() {

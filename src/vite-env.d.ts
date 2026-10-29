@@ -1,0 +1,12 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_DAD_API_URL: string;
+  readonly VITE_AUTH_API_URL: string;
+  readonly VITE_CADASTRO_API_URL: string;
+  readonly VITE_SENHA_API_URL: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

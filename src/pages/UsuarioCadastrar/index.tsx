@@ -1,194 +1,236 @@
 import { Link } from "react-router-dom";
 
-import { useCadastroUsuario } from "../../hooks/useCadastroUsuario";
+import Campo from "../../components/Campo";
+import { useCadastroPessoa } from "../../hooks/useCadastroPessoa";
 
 export default function UsuarioCadastrar() {
   const {
+    passo,
     formulario,
     erros,
-    estado,
-    alterarCampo,
+    mensagem,
+    salvando,
+    alterar,
+    continuar,
     salvar,
-  } = useCadastroUsuario();
-
-  if (estado.status === "sucesso") {
-    return (
-      <section className="painel estado-vazio">
-        <h1>Usuário cadastrado</h1>
-
-        <p role="status">
-          O cadastro de {estado.usuario.nome} foi salvo com sucesso.
-        </p>
-
-        <div className="formulario-acoes">
-          <Link className="botao" to="/usuarios">
-            Voltar para lista
-          </Link>
-
-          <Link
-            className="botao botao--primario"
-            to={`/usuarios/${estado.usuario.id}`}
-          >
-            Ver detalhes
-          </Link>
-        </div>
-      </section>
-    );
-  }
+    voltar,
+  } = useCadastroPessoa();
 
   return (
-    <section>
-      <div className="pagina-cabecalho">
-        <div>
-          <h1 className="pagina-titulo">Cadastrar usuário</h1>
-          <p className="pagina-descricao">
-            Preencha os dados do novo usuário
-          </p>
-        </div>
-      </div>
-
+    <section className="cadastro-pessoa">
       <form
-        className="painel formulario"
+        className="cadastro-pessoa-card"
         noValidate
         onSubmit={(evento) => {
           evento.preventDefault();
-          void salvar();
+
+          if (passo === 1) {
+            continuar();
+          } else {
+            void salvar();
+          }
         }}
       >
-        <fieldset disabled={estado.status === "salvando"}>
-          <legend>Dados do usuário</legend>
+        <h1>Cadastro</h1>
 
-          <div className="formulario-grade">
-            <div className="campo">
-              <label htmlFor="usuario-nome">Nome completo</label>
-              <input
-                id="usuario-nome"
-                type="text"
-                autoComplete="name"
-                maxLength={100}
-                required
-                value={formulario.nome}
-                onChange={(e) => alterarCampo("nome", e.target.value)}
+        <p className="cadastro-pessoa-passos">
+          Passo {passo} de 2
+          <span
+            className={passo === 1 ? "passo-ativo" : ""}
+            aria-hidden="true"
+          />
+          <span
+            className={passo === 2 ? "passo-ativo" : ""}
+            aria-hidden="true"
+          />
+        </p>
+
+        <fieldset disabled={salvando}>
+          <legend className="somente-leitor">
+            {passo === 1 ? "Dados pessoais" : "Endereço e confirmação"}
+          </legend>
+
+          {passo === 1 ? (
+            <>
+              <Campo
+                id="cadastro-nome"
+                titulo="Nome completo"
+                valor={formulario.nomeUsuario}
+                maximo={100}
+                erro={erros.nomeUsuario}
+                onChange={(valor) => alterar("nomeUsuario", valor)}
               />
-              {erros.nome && (
-                <span className="erro-campo" role="alert">
-                  {erros.nome}
-                </span>
-              )}
-            </div>
 
-            <div className="campo">
-              <label htmlFor="usuario-email">E-mail</label>
-              <input
-                id="usuario-email"
-                type="email"
-                autoComplete="email"
-                maxLength={160}
-                required
-                value={formulario.email}
-                onChange={(e) => alterarCampo("email", e.target.value)}
+              <Campo
+                id="cadastro-email"
+                titulo="E-mail"
+                tipo="email"
+                valor={formulario.email}
+                maximo={255}
+                erro={erros.email}
+                onChange={(valor) => alterar("email", valor)}
               />
-              {erros.email && (
-                <span className="erro-campo" role="alert">
-                  {erros.email}
-                </span>
-              )}
-            </div>
 
-            <div className="campo">
-              <label htmlFor="usuario-cidade">Cidade</label>
-              <input
-                id="usuario-cidade"
-                type="text"
-                autoComplete="address-level2"
-                maxLength={80}
-                required
-                value={formulario.cidade}
-                onChange={(e) => alterarCampo("cidade", e.target.value)}
+              <div className="cadastro-pessoa-grade">
+                <Campo
+                  id="cadastro-cpf"
+                  titulo="CPF"
+                  valor={formulario.cpf}
+                  maximo={14}
+                  erro={erros.cpf}
+                  onChange={(valor) => alterar("cpf", valor)}
+                />
+
+                <div className="campo">
+                  <label htmlFor="cadastro-nascimento">
+                    Data de nascimento
+                  </label>
+
+                  <input
+                    id="cadastro-nascimento"
+                    type="date"
+                    value={formulario.dataNascimento}
+                    aria-invalid={Boolean(erros.dataNascimento)}
+                    aria-describedby={
+                      erros.dataNascimento
+                        ? "cadastro-nascimento-erro"
+                        : undefined
+                    }
+                    onChange={(evento) =>
+                      alterar("dataNascimento", evento.target.value)
+                    }
+                  />
+
+                  {erros.dataNascimento && (
+                    <span
+                      id="cadastro-nascimento-erro"
+                      className="erro-campo"
+                      role="alert"
+                    >
+                      {erros.dataNascimento}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <Campo
+                id="cadastro-senha"
+                titulo="Senha"
+                tipo="password"
+                valor={formulario.senha}
+                erro={erros.senha}
+                onChange={(valor) => alterar("senha", valor)}
               />
-              {erros.cidade && (
-                <span className="erro-campo" role="alert">
-                  {erros.cidade}
-                </span>
-              )}
-            </div>
 
-            <div className="campo">
-              <label htmlFor="usuario-uf">UF</label>
-              <input
-                id="usuario-uf"
-                type="text"
-                autoComplete="address-level1"
-                placeholder="SP"
-                maxLength={2}
-                required
-                value={formulario.uf}
-                onChange={(e) =>
-                  alterarCampo("uf", e.target.value.toUpperCase())
-                }
-              />
-              {erros.uf && (
-                <span className="erro-campo" role="alert">
-                  {erros.uf}
-                </span>
-              )}
-            </div>
-
-            <div className="campo">
-              <label htmlFor="usuario-tipo">Tipo de usuário</label>
-              <select
-                id="usuario-tipo"
-                value={formulario.tipo}
-                onChange={(e) => {
-                  const valor = e.target.value;
-
-                  if (
-                    valor === "MORADOR" ||
-                    valor === "USUARIO_COMUM" ||
-                    valor === "SINDICO" ||
-                    valor === "COOPERATIVA"
-                  ) {
-                    alterarCampo("tipo", valor);
+              <label className="cadastro-pessoa-vinculo">
+                <input
+                  type="checkbox"
+                  checked={formulario.possuiVinculo}
+                  onChange={(evento) =>
+                    alterar("possuiVinculo", evento.target.checked)
                   }
-                }}
-              >
-                <option value="USUARIO_COMUM">Usuário comum</option>
-                <option value="MORADOR">Morador</option>
-                <option value="SINDICO">Síndico</option>
-                <option value="COOPERATIVA">Cooperativa</option>
-              </select>
-              {erros.tipo && (
-                <span className="erro-campo" role="alert">
-                  {erros.tipo}
-                </span>
+                />
+                Possui vínculo com condomínio
+              </label>
+
+              {formulario.possuiVinculo && (
+                <Campo
+                  id="cadastro-codigo"
+                  titulo="Código do condomínio"
+                  valor={formulario.codigoCondominio}
+                  erro={erros.codigoCondominio}
+                  onChange={(valor) =>
+                    alterar("codigoCondominio", valor.toUpperCase())
+                  }
+                />
               )}
+            </>
+          ) : formulario.possuiVinculo ? (
+            <div className="cadastro-pessoa-confirmacao">
+              <h2>Vínculo com condomínio</h2>
+
+              <p>
+                Código informado:{" "}
+                <strong>{formulario.codigoCondominio}</strong>
+              </p>
+
+              <p>
+                Ao cadastrar, o sistema localizará o condomínio pelo
+                código e criará o vínculo. O endereço será o do condomínio.
+              </p>
             </div>
-          </div>
-        </fieldset>
+          ) : (
+            <>
+              <p className="pagina-descricao">
+                O endereço será localizado pelo CEP informado.
+              </p>
 
-        {estado.status === "erro" && (
-          <p className="erro-campo" role="alert">
-            {estado.mensagem}
-          </p>
-        )}
+              <div className="cadastro-pessoa-grade">
+                <Campo
+                  id="cadastro-cep"
+                  titulo="CEP"
+                  valor={formulario.cep}
+                  maximo={9}
+                  erro={erros.cep}
+                  onChange={(valor) => alterar("cep", valor)}
+                />
 
-        {estado.status === "salvando" && (
-          <p role="status">Salvando usuário...</p>
-        )}
+                <Campo
+                  id="cadastro-numero"
+                  titulo="Número"
+                  valor={formulario.numero}
+                  erro={erros.numero}
+                  onChange={(valor) => alterar("numero", valor)}
+                />
+              </div>
 
-        <div className="formulario-acoes">
-          <Link className="botao" to="/usuarios">
-            Voltar
-          </Link>
+              <Campo
+                id="cadastro-complemento"
+                titulo="Complemento — opcional"
+                valor={formulario.complemento}
+                erro={erros.complemento}
+                onChange={(valor) => alterar("complemento", valor)}
+              />
+            </>
+          )}
+
+          {mensagem && (
+            <p className="mensagem-erro" role="alert">
+              {mensagem}
+            </p>
+          )}
+
+          {salvando && (
+            <p role="status">Cadastrando usuário...</p>
+          )}
 
           <button
-            className="botao botao--primario"
+            className="botao botao--primario cadastro-pessoa-enviar"
             type="submit"
-            disabled={estado.status === "salvando"}
+            disabled={salvando}
           >
-            {estado.status === "salvando" ? "Salvando..." : "Cadastrar"}
+            {salvando
+              ? "Cadastrando..."
+              : passo === 1
+                ? "Continuar"
+                : "Cadastrar"}
           </button>
-        </div>
+
+          <div className="cadastro-pessoa-voltar">
+            {passo === 2 ? (
+              <button
+                type="button"
+                className="link-botao"
+                onClick={voltar}
+                disabled={salvando}
+              >
+                Voltar
+              </button>
+            ) : (
+              <Link to="/usuarios">Cancelar</Link>
+            )}
+          </div>
+        </fieldset>
       </form>
     </section>
   );

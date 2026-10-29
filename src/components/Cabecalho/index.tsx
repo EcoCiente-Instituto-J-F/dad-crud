@@ -26,14 +26,24 @@ export default function Cabecalho() {
 
   const resultados = busca.trim()
     ? modulos.filter((modulo) =>
-        normalizarPesquisa(modulo.nome).includes(normalizarPesquisa(busca)),
-      )
+      normalizarPesquisa(modulo.nome).includes(normalizarPesquisa(busca)),
+    )
     : [];
 
   return (
     <header className="cabecalho">
-      <Link className="marca" to="/home">EcoCiente</Link>
-
+      <Link
+        className="marca"
+        to="/home"
+        aria-label="EcoCiente — início"
+      >
+        <img
+          className="marca__logo"
+          src="/ecociente-logo.png"
+          alt="EcoCiente"
+        />
+      </Link>
+      
       <div className="busca-global">
         <label className="somente-leitor" htmlFor="busca-modulos">
           Pesquisar módulos
