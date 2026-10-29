@@ -10,7 +10,7 @@ import type {
 import type { ResultadoFormulario } from "../types/formulario";
 
 export const perfilAdminSchema = z.object({
-  id: z.string().min(1),
+  id: z.number().int().positive(),
   nome: z.string().trim().min(3).max(100),
   email: z.string().trim().email().max(160),
   cpf: z.string().max(14),
@@ -24,8 +24,11 @@ export const perfilAdminSchema = z.object({
 });
 
 export const sessaoAdminSchema = z.object({
-  _versao: z.literal(1),
+  _versao: z.literal(2),
+  token: z.string().min(1),
+  tipoToken: z.literal("Bearer"),
   expiraEm: z.number().finite().positive(),
+  papel: z.literal("ADMIN"),
   perfil: perfilAdminSchema,
 });
 

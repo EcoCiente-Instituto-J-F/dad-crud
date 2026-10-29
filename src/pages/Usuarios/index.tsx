@@ -2,26 +2,30 @@ import { RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import EstadoRequisicao from "../../components/EstadoRequisicao";
-import FiltrosUsuarios from "../../components/FiltrosUsuarios";
+import FiltrosUsuariosApi from "../../components/FiltrosUsuariosApi";
+import TabelaUsuariosApi from "../../components/TabelaUsuariosApi";
 import Paginacao from "../../components/Paginacao";
-import TabelaUsuarios from "../../components/TabelaUsuarios";
 
-import { useUsuarios } from "../../hooks/useUsuarios";
+import { useCatalogos } from "../../hooks/useCatalogos";
+import { useUsuariosApi } from "../../hooks/useUsuariosApi";
 
 export default function Usuarios() {
   const {
     requisicao,
     filtros,
-    usuariosPagina,
-    totalItens,
-    totalPaginas,
-    porPagina,
-    alterarBusca,
-    alterarStatus,
-    alterarOrdenacao,
-    alterarPagina,
     recarregar,
-  } = useUsuarios();
+    alterarBusca,
+    alterarAtivo,
+    alterarTipo,
+    alterarPagina,
+  } = useUsuariosApi();
+
+  const catalogos = useCatalogos();
+
+  const carregando = requisicao.status === "carregando";
+
+  const pagina =
+    requisicao.status === "sucesso" ? requisicao.dados : null;
 
   return (
     <section>
@@ -30,7 +34,7 @@ export default function Usuarios() {
           <h1 className="pagina-titulo">Usuários</h1>
 
           <p className="pagina-descricao">
-            Visualize e gerencie todos os usuários
+            Visualize e gerencie os usuários cadastrados.
           </p>
         </div>
 
@@ -38,8 +42,8 @@ export default function Usuarios() {
           <button
             type="button"
             className="botao"
+            disabled={carregando}
             onClick={recarregar}
-            disabled={requisicao.status === "carregando"}
           >
             <RefreshCw size={17} aria-hidden="true" />
             Atualizar
@@ -54,19 +58,44 @@ export default function Usuarios() {
         </div>
       </div>
 
-      <FiltrosUsuarios
-        filtros={filtros}
+      {catalogos.requisicao.status === "carregando" && (
+        <p role="status">Carregando opções dos filtros...</p>
+      )}
+
+      {catalogos.requisicao.status === "erro" && (
+        <div className="mensagem-erro" role="alert">
+          <p>{catalogos.requisicao.mensagem}</p>
+
+          <button
+            type="button"
+            className="botao"
+            onClick={catalogos.recarregar}
+          >
+            Recarregar filtros
+          </button>
+        </div>
+      )}
+
+      <FiltrosUsuariosApi
+        busca={filtros.busca ?? ""}
+        ativo={filtros.ativo}
+        tipoUsuarioId={filtros.tipoUsuarioId}
+        tipos={
+          catalogos.requisicao.status === "sucesso"
+            ? catalogos.requisicao.dados.tiposUsuarios
+            : []
+        }
         onBuscaChange={alterarBusca}
-        onStatusChange={alterarStatus}
-        onOrdenacaoChange={alterarOrdenacao}
+        onAtivoChange={alterarAtivo}
+        onTipoChange={alterarTipo}
       />
 
-      <div
-        className="painel"
-        aria-busy={requisicao.status === "carregando"}
-      >
+      <div className="painel" aria-busy={carregando}>
         {requisicao.status === "carregando" && (
-          <EstadoRequisicao estado="carregando" />
+          <EstadoRequisicao
+            estado="carregando"
+            mensagem="Carregando usuários..."
+          />
         )}
 
         {requisicao.status === "erro" && (
@@ -77,20 +106,20 @@ export default function Usuarios() {
           />
         )}
 
-        {requisicao.status === "sucesso" && (
+        {pagina && (
           <>
             <p className="resultado-carregamento" role="status">
-              Lista carregada. {totalItens} usuário(s) encontrado(s).
+              {pagina.totalItens} usuário(s) encontrado(s).
             </p>
 
-            <TabelaUsuarios usuarios={usuariosPagina} />
+            <TabelaUsuariosApi usuarios={pagina.itens} />
 
             <Paginacao
-              paginaAtual={filtros.pagina}
-              totalPaginas={totalPaginas}
-              totalItens={totalItens}
-              porPagina={porPagina}
-              onPaginaChange={alterarPagina}
+              paginaAtual={pagina.pagina + 1}
+              totalPaginas={Math.max(1, pagina.totalPaginas)}
+              totalItens={pagina.totalItens}
+              porPagina={pagina.tamanho}
+              onPaginaChange={(numero) => alterarPagina(numero - 1)}
             />
           </>
         )}

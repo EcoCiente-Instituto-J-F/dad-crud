@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import Modal from "../../components/Modal";
 import { useLogin } from "../../hooks/useLogin";
@@ -59,9 +59,8 @@ export default function Login() {
               <label htmlFor="login-email">E-mail</label>
 
               <div
-                className={`login-input-container${
-                  erros.email ? " login-input-container--erro" : ""
-                }`}
+                className={`login-input-container${erros.email ? " login-input-container--erro" : ""
+                  }`}
               >
                 <Mail
                   className="login-input-icone"
@@ -105,9 +104,8 @@ export default function Login() {
               <label htmlFor="login-senha">Senha</label>
 
               <div
-                className={`login-input-container${
-                  erros.senha ? " login-input-container--erro" : ""
-                }`}
+                className={`login-input-container${erros.senha ? " login-input-container--erro" : ""
+                  }`}
               >
                 <LockKeyhole
                   className="login-input-icone"
@@ -163,13 +161,12 @@ export default function Login() {
               )}
             </div>
 
-            <button
-              type="button"
+            <Link
               className="login-recuperacao"
-              onClick={() => setRecuperacao(true)}
+              to="/recuperar-senha"
             >
               Esqueceu a senha?
-            </button>
+            </Link>
 
             {estado.status === "erro" && (
               <p className="mensagem-erro" role="alert">
@@ -199,9 +196,8 @@ export default function Login() {
         onFechar={() => setRecuperacao(false)}
       >
         <p>
-          A recuperação de senha ainda não está disponível nesta demonstração.
-          Para acessar, use o e-mail admin@ecociente.com e a senha inicial
-          EcoCiente@2026.
+          A recuperação de senha ainda não está disponível neste painel.
+          Entre em contato com o responsável pelo sistema.
         </p>
 
         <div className="formulario-acoes">

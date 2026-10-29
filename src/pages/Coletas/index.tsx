@@ -1,178 +1,179 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import CalendarioColetas from "../../components/CalendarioColetas";
-import EstadoRequisicao from "../../components/EstadoRequisicao";
-import { useColetas } from "../../hooks/useColetas";
-import { formatarData } from "../../utils/calendarioColetas";
-import { normalizarPesquisa } from "../../utils/usuarios";
+import ListagemApi from "../../components/ListagemApi";
+
+import { useCatalogos } from "../../hooks/useCatalogos";
+import { useColetasApi } from "../../hooks/useModulosApi";
+
+import {
+  converterDataLocal,
+  formatarDataHora,
+  preencherDataLocal,
+} from "../../utils/datasApi";
+
+import type { ColunaListagemApi } from "../../types/listagemApi";
+import type { ColetaApi } from "../../types/modulosApi";
+
+const colunas: ColunaListagemApi<ColetaApi>[] = [
+  {
+    id: "id",
+    titulo: "ID",
+    renderizar: (item) => (
+      <Link className="usuario-link" to={`/coletas/${item.id}`}>
+        #{item.id}
+      </Link>
+    ),
+  },
+  {
+    id: "condominio",
+    titulo: "Condomínio",
+    renderizar: (item) => `#${item.condominioId}`,
+  },
+  {
+    id: "cooperativa",
+    titulo: "Cooperativa",
+    renderizar: (item) => `#${item.cooperativaId}`,
+  },
+  {
+    id: "inicio",
+    titulo: "Início",
+    renderizar: (item) => formatarDataHora(item.dataInicio),
+  },
+  {
+    id: "status",
+    titulo: "Situação",
+    renderizar: (item) => item.status,
+  },
+  {
+    id: "recorrencia",
+    titulo: "Recorrente",
+    renderizar: (item) => (item.recorrente ? "Sim" : "Não"),
+  },
+  {
+    id: "visitas",
+    titulo: "Visitas",
+    renderizar: (item) => item.visitas.length,
+  },
+  {
+    id: "acoes",
+    titulo: "Ações",
+    renderizar: (item) => (
+      <Link className="botao" to={`/coletas/${item.id}/editar`}>
+        Editar
+      </Link>
+    ),
+  },
+];
 
 export default function Coletas() {
-  const { requisicao, recarregar } = useColetas();
+  const {
+    requisicao,
+    filtros,
+    alterarFiltros,
+    alterarPagina,
+    recarregar,
+  } = useColetasApi();
 
-  const [filtros, setFiltros] = useState({
-    busca: "",
-    status: "TODOS",
-    visualizacao: "lista",
-  });
+  const catalogos = useCatalogos();
 
-  const dados = requisicao.status === "sucesso" ? requisicao.dados : null;
-
-  const coletas = dados?.coletas.filter((coleta) => {
-    const condominio = dados.condominios.find(
-      (item) => item.id === coleta.condominioId,
-    );
-    const cooperativa = dados.cooperativas.find(
-      (item) => item.id === coleta.cooperativaId,
-    );
-
-    return (
-      normalizarPesquisa(`${condominio?.nome ?? ""} ${cooperativa?.nome ?? ""}`)
-        .includes(normalizarPesquisa(filtros.busca)) &&
-      (filtros.status === "TODOS" || filtros.status === coleta.status)
-    );
-  }) ?? [];
+  const status =
+    catalogos.requisicao.status === "sucesso"
+      ? catalogos.requisicao.dados.statusAgendamentos
+      : [];
 
   return (
-    <section>
-      <div className="pagina-cabecalho">
-        <div>
-          <h1 className="pagina-titulo">Coletas</h1>
-          <p className="pagina-descricao">Agendamentos, calendário e visitas</p>
-        </div>
+    <>
+      {catalogos.requisicao.status === "erro" && (
+        <div className="mensagem-erro" role="alert">
+          <p>{catalogos.requisicao.mensagem}</p>
 
-        <Link className="botao botao--primario" to="/coletas/cadastrar">
-          Cadastrar coleta
-        </Link>
-      </div>
-
-      <div className="filtros-condominios">
-        <div className="campo">
-          <label htmlFor="coletas-busca">Pesquisar participantes</label>
-          <input
-            id="coletas-busca"
-            className="entrada"
-            type="search"
-            maxLength={120}
-            value={filtros.busca}
-            onChange={(evento) =>
-              setFiltros((anterior) => ({
-                ...anterior,
-                busca: evento.target.value,
-              }))
-            }
-          />
-        </div>
-
-        <div className="campo">
-          <label htmlFor="coletas-status">Status</label>
-          <select
-            id="coletas-status"
-            value={filtros.status}
-            onChange={(evento) =>
-              setFiltros((anterior) => ({
-                ...anterior,
-                status: evento.target.value,
-              }))
-            }
+          <button
+            type="button"
+            className="botao"
+            onClick={catalogos.recarregar}
           >
-            <option value="TODOS">Todos</option>
-            <option value="AGENDADA">Agendadas</option>
-            <option value="CANCELADA">Canceladas</option>
-          </select>
+            Recarregar opções de situação
+          </button>
         </div>
-      </div>
-
-      <div className="acoes-pagina">
-        <button
-          className="botao"
-          type="button"
-          onClick={() =>
-            setFiltros((anterior) => ({
-              ...anterior,
-              visualizacao: anterior.visualizacao === "lista" ? "calendario" : "lista",
-            }))
-          }
-        >
-          {filtros.visualizacao === "lista" ? "Ver calendário" : "Ver lista"}
-        </button>
-      </div>
-
-      {requisicao.status === "carregando" && (
-        <EstadoRequisicao estado="carregando" />
       )}
 
-      {requisicao.status === "erro" && (
-        <EstadoRequisicao
-          estado="erro"
-          mensagem={requisicao.mensagem}
-          onTentarNovamente={recarregar}
-        />
-      )}
+      <ListagemApi
+        titulo="Coletas"
+        descricao="Gerencie agendamentos e acompanhe as visitas."
+        caminhoCadastro="/coletas/cadastrar"
+        busca={filtros.busca ?? ""}
+        onBuscaChange={(busca) => alterarFiltros({ busca })}
+        requisicao={requisicao}
+        colunas={colunas}
+        onRecarregar={recarregar}
+        onPaginaChange={alterarPagina}
+        filtrosExtras={
+          <>
+            <div className="campo">
+              <label htmlFor="coletas-status">Situação</label>
 
-      {dados && (
-        <>
-          <p role="status">{coletas.length} agendamento(s) encontrado(s).</p>
+              <select
+                id="coletas-status"
+                value={filtros.statusId ?? ""}
+                disabled={
+                  catalogos.requisicao.status !== "sucesso"
+                }
+                onChange={(evento) =>
+                  alterarFiltros({
+                    statusId: evento.target.value
+                      ? Number(evento.target.value)
+                      : undefined,
+                  })
+                }
+              >
+                <option value="">Todas</option>
 
-          {filtros.visualizacao === "calendario" ? (
-            <CalendarioColetas
-              coletas={coletas}
-              condominios={dados.condominios}
-            />
-          ) : (
-            <div className="painel tabela-container espaco-superior">
-              <table className="tabela-usuarios">
-                <thead>
-                  <tr>
-                    <th>Condomínio</th>
-                    <th>Cooperativa</th>
-                    <th>Período</th>
-                    <th>Recorrência</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {coletas.map((coleta) => (
-                    <tr key={coleta.id}>
-                      <td>
-                        {dados.condominios.find(
-                          (item) => item.id === coleta.condominioId,
-                        )?.nome ?? "Indisponível"}
-                      </td>
-                      <td>
-                        {dados.cooperativas.find(
-                          (item) => item.id === coleta.cooperativaId,
-                        )?.nome ?? "Indisponível"}
-                      </td>
-                      <td>
-                        {formatarData(coleta.dataInicio)} até{" "}
-                        {formatarData(coleta.dataFim)}
-                        <br />
-                        {coleta.horaInicio}–{coleta.horaFim}
-                      </td>
-                      <td>{coleta.recorrente ? "Semanal" : "Única"}</td>
-                      <td>
-                        {coleta.status === "AGENDADA" ? "Agendada" : "Cancelada"}
-                      </td>
-                      <td>
-                        <Link className="botao" to={`/coletas/${coleta.id}`}>
-                          Detalhes
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {coletas.length === 0 && (
-                <div className="estado-vazio">Nenhuma coleta encontrada.</div>
-              )}
+                {status.map((opcao) => (
+                  <option key={opcao.id} value={opcao.id}>
+                    {opcao.nome}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
-        </>
-      )}
-    </section>
+
+            <div className="campo">
+              <label htmlFor="coletas-inicio">A partir de</label>
+
+              <input
+                id="coletas-inicio"
+                className="entrada"
+                type="datetime-local"
+                value={preencherDataLocal(filtros.inicio ?? null)}
+                onChange={(evento) =>
+                  alterarFiltros({
+                    inicio: evento.target.value
+                      ? converterDataLocal(evento.target.value)
+                      : undefined,
+                  })
+                }
+              />
+            </div>
+
+            <div className="campo">
+              <label htmlFor="coletas-fim">Até</label>
+
+              <input
+                id="coletas-fim"
+                className="entrada"
+                type="datetime-local"
+                value={preencherDataLocal(filtros.fim ?? null)}
+                onChange={(evento) =>
+                  alterarFiltros({
+                    fim: evento.target.value
+                      ? converterDataLocal(evento.target.value)
+                      : undefined,
+                  })
+                }
+              />
+            </div>
+          </>
+        }
+      />
+    </>
   );
 }

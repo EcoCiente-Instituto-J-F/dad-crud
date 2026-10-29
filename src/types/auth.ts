@@ -6,7 +6,7 @@ export interface Credenciais {
 }
 
 export interface PerfilAdmin {
-  id: string;
+  id: number;
   nome: string;
   email: string;
   cpf: string;
@@ -15,8 +15,11 @@ export interface PerfilAdmin {
 }
 
 export interface SessaoAdmin {
-  _versao: 1;
+  _versao: 2;
+  token: string;
+  tipoToken: "Bearer";
   expiraEm: number;
+  papel: "ADMIN";
   perfil: PerfilAdmin;
 }
 

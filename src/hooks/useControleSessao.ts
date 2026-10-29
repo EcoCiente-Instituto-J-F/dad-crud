@@ -1,11 +1,6 @@
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer } from "react";
 
-import {
-  autenticar,
-  editarPerfilAdmin,
-  prepararAvatar,
-  trocarSenhaAdmin,
-} from "../services/authService";
+import { autenticar } from "../services/loginService";
 
 import {
   lerSessao,
@@ -20,7 +15,6 @@ import type {
   DadosPerfil,
   DadosSenha,
   EstadoAuth,
-  SessaoAdmin,
 } from "../types/auth";
 
 function reducer(
@@ -30,7 +24,10 @@ function reducer(
   switch (acao.tipo) {
     case "ENTRAR":
     case "ATUALIZAR":
-      return { status: "autenticado", sessao: acao.sessao };
+      return {
+        status: "autenticado",
+        sessao: acao.sessao,
+      };
 
     case "SAIR":
       return { status: "visitante" };
@@ -48,6 +45,14 @@ function estadoInicial(): EstadoAuth {
     : { status: "visitante" };
 }
 
+function limparSessao(): void {
+  try {
+    removerSessao();
+  } catch {
+    // O acesso em memória é encerrado mesmo se o armazenamento falhar.
+  }
+}
+
 export function useControleSessao(): AuthContextValue {
   const [estado, dispatch] = useReducer(
     reducer,
@@ -55,27 +60,9 @@ export function useControleSessao(): AuthContextValue {
     estadoInicial,
   );
 
-  const atual = useRef<EstadoAuth>(estado);
-
-  useEffect(() => {
-    atual.current = estado;
-  }, [estado]);
-
-  function aplicarSessao(sessao: SessaoAdmin): void {
-    salvarSessao(sessao);
-    atual.current = { status: "autenticado", sessao };
-    dispatch({ tipo: "ATUALIZAR", sessao });
-  }
-
   function sair(): void {
-    atual.current = { status: "visitante" };
+    limparSessao();
     dispatch({ tipo: "SAIR" });
-
-    try {
-      removerSessao();
-    } catch {
-      // O estado em memória é encerrado mesmo se o armazenamento falhar.
-    }
   }
 
   useEffect(() => {
@@ -84,14 +71,8 @@ export function useControleSessao(): AuthContextValue {
     const restante = estado.sessao.expiraEm - Date.now();
 
     const temporizador = window.setTimeout(() => {
-      atual.current = { status: "visitante" };
+      limparSessao();
       dispatch({ tipo: "SAIR" });
-
-      try {
-        removerSessao();
-      } catch {
-        // A sessão já foi encerrada em memória.
-      }
     }, Math.max(0, restante));
 
     return () => window.clearTimeout(temporizador);
@@ -102,93 +83,42 @@ export function useControleSessao(): AuthContextValue {
     signal: AbortSignal,
   ): Promise<void> {
     const sessao = await autenticar(credenciais, signal);
+
     signal.throwIfAborted();
 
+    if (sessao.expiraEm <= Date.now()) {
+      throw new Error("A sessão recebida já expirou. Entre novamente.");
+    }
+
     salvarSessao(sessao);
-    atual.current = { status: "autenticado", sessao };
     dispatch({ tipo: "ENTRAR", sessao });
   }
 
   async function atualizarPerfil(
-    dados: DadosPerfil,
-    signal: AbortSignal,
+    _dados: DadosPerfil,
+    _signal: AbortSignal,
   ): Promise<void> {
-    const inicio = atual.current;
-
-    if (inicio.status !== "autenticado") {
-      throw new Error("Sua sessão expirou.");
-    }
-
-    const perfil = await editarPerfilAdmin(
-      inicio.sessao.perfil,
-      dados,
-      signal,
+    throw new Error(
+      "A edição de perfil ainda não foi integrada à API.",
     );
-
-    signal.throwIfAborted();
-
-    const vigente = atual.current;
-
-    if (
-      vigente.status !== "autenticado" ||
-      vigente.sessao.expiraEm !== inicio.sessao.expiraEm ||
-      vigente.sessao.expiraEm <= Date.now()
-    ) {
-      throw new Error("Sua sessão expirou.");
-    }
-
-    aplicarSessao({
-      ...vigente.sessao,
-      perfil: {
-        ...vigente.sessao.perfil,
-        nome: perfil.nome,
-        email: perfil.email,
-        telefone: perfil.telefone,
-      },
-    });
   }
 
   async function atualizarAvatar(
-    arquivo: File,
-    signal: AbortSignal,
+    _arquivo: File,
+    _signal: AbortSignal,
   ): Promise<void> {
-    const inicio = atual.current;
-
-    if (inicio.status !== "autenticado") {
-      throw new Error("Sua sessão expirou.");
-    }
-
-    const avatar = await prepararAvatar(arquivo, signal);
-    signal.throwIfAborted();
-
-    const vigente = atual.current;
-
-    if (
-      vigente.status !== "autenticado" ||
-      vigente.sessao.expiraEm !== inicio.sessao.expiraEm ||
-      vigente.sessao.expiraEm <= Date.now()
-    ) {
-      throw new Error("Sua sessão expirou.");
-    }
-
-    aplicarSessao({
-      ...vigente.sessao,
-      perfil: { ...vigente.sessao.perfil, avatar },
-    });
+    throw new Error(
+      "A alteração de avatar ainda não foi integrada à API.",
+    );
   }
 
   async function alterarSenha(
-    dados: DadosSenha,
-    signal: AbortSignal,
+    _dados: DadosSenha,
+    _signal: AbortSignal,
   ): Promise<void> {
-    if (
-      atual.current.status !== "autenticado" ||
-      atual.current.sessao.expiraEm <= Date.now()
-    ) {
-      throw new Error("Sua sessão expirou.");
-    }
-
-    await trocarSenhaAdmin(dados, signal);
+    throw new Error(
+      "A alteração de senha ainda não foi integrada à API.",
+    );
   }
 
   return {

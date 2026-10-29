@@ -8,6 +8,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Home = lazy(() => import("./pages/Home"));
 const Perfil = lazy(() => import("./pages/Perfil"));
 const Erro = lazy(() => import("./pages/Erro"));
+const RecuperarSenha = lazy(() => import("./pages/RecuperarSenha"));
 
 const Usuarios = lazy(() => import("./pages/Usuarios"));
 const UsuarioCadastrar = lazy(() => import("./pages/UsuarioCadastrar"));
@@ -44,6 +45,7 @@ export default function App() {
     >
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
 
         <Route element={<PrivateRoute />}>
           <Route element={<Layout />}>
