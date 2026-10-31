@@ -22,6 +22,8 @@ export default function Campo({
         <textarea
           id={id}
           value={valor}
+          aria-invalid={Boolean(erro)}
+          aria-describedby={erro ? id + "-erro" : undefined}
           maxLength={maximo}
           required={obrigatorio}
           onChange={(evento) => onChange(evento.target.value)}
@@ -30,6 +32,8 @@ export default function Campo({
         <input
           id={id}
           type={tipo}
+          aria-invalid={Boolean(erro)}
+          aria-describedby={erro ? id + "-erro" : undefined}
           value={valor}
           maxLength={maximo}
           required={obrigatorio}
@@ -41,7 +45,7 @@ export default function Campo({
       )}
 
       {erro && (
-        <span className="erro-campo" role="alert">
+        <span id={id + "-erro"} className="erro-campo" role="alert">
           {erro}
         </span>
       )}
