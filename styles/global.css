@@ -2815,3 +2815,89 @@ p {
 .editor-api-campos .material-opcao {
   width: fit-content;
 }
+/* Ajuste do tamanho do logo e do cabeçalho */
+.cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24px 40px;
+}
+
+.cabecalho .marca {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 190px;
+  width: 190px;
+  max-width: 190px;
+  min-width: 0;
+  padding: 0;
+  line-height: 1;
+}
+
+.cabecalho .marca::before,
+.cabecalho .marca::after {
+  content: none;
+  display: none;
+}
+
+.cabecalho .marca img.marca__logo {
+  display: block;
+  width: 100%;
+  max-width: 190px;
+  height: auto;
+  max-height: 60px;
+  object-fit: contain;
+}
+
+.cabecalho .busca-global {
+  flex: 1 1 400px;
+  width: 100%;
+  max-width: 640px;
+  min-width: 0;
+}
+
+.cabecalho .busca-global-campo {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cabecalho .busca-global input {
+  min-width: 0;
+  width: 100%;
+}
+
+.cabecalho .perfil-link {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+  .cabecalho {
+    padding: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .cabecalho .marca {
+    flex-basis: 150px;
+    width: 150px;
+    max-width: 150px;
+  }
+
+  .cabecalho .marca img.marca__logo {
+    max-width: 150px;
+    max-height: 48px;
+  }
+
+  .cabecalho .perfil-link {
+    margin-left: auto;
+  }
+
+  .cabecalho .busca-global {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+}

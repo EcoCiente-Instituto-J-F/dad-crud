@@ -1,7 +1,6 @@
 import { simularRequisicao } from "../utils/simularRequisicao";
 
 import {
-  validarCredenciais,
   validarPerfil,
   validarSenha,
 } from "../utils/validarAuth";
@@ -20,44 +19,10 @@ export async function autenticar(
   credenciais: Credenciais,
   signal: AbortSignal,
 ): Promise<SessaoAdmin> {
-  try {
-    const resultado = validarCredenciais(credenciais);
+  const { autenticar: autenticarApi } = await import("./loginService");
 
-    if (!resultado.valido) {
-      throw new Error("Revise o e-mail e a senha.");
-    }
-
-    await simularRequisicao(signal);
-    signal.throwIfAborted();
-
-    if (
-      resultado.dados.email !== "admin@ecociente.com" ||
-      resultado.dados.senha !== senhaDemonstracao
-    ) {
-      throw new Error("E-mail ou senha incorretos.");
-    }
-
-    return {
-      _versao: 1,
-      expiraEm: Date.now() + 60 * 60 * 1000,
-      perfil: {
-        id: "admin-demo",
-        nome: "Ana Oliveira",
-        email: "admin@ecociente.com",
-        cpf: "",
-        telefone: "11999999999",
-        avatar: "",
-      },
-    };
-  } catch (erro: unknown) {
-    if (signal.aborted) throw erro;
-
-    throw new Error(
-      erro instanceof Error ? erro.message : "Não foi possível entrar.",
-    );
-  }
+  return autenticarApi(credenciais, signal);
 }
-
 export async function editarPerfilAdmin(
   perfil: PerfilAdmin,
   dados: DadosPerfil,
