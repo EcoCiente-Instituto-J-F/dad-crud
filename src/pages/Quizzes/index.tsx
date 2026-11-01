@@ -15,7 +15,7 @@ const colunas: ColunaListagemApi<QuizApi>[] = [
   {
     id: "titulo",
     titulo: "Título",
-    renderizar: (item) => item.titulo,
+    renderizar: (item) => <Link className="usuario-link" to={`/quizzes/${item.id}`}>{item.titulo}</Link>,
   },
   {
     id: "curso",

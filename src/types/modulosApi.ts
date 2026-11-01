@@ -85,6 +85,8 @@ const perguntaSchema = z.object({
 });
 
 export const quizSchema = z.object({
+  possuiTentativas: z.boolean().optional(),
+  totalTentativas: z.number().int().nonnegative().optional(),
   id: idSchema,
   cursoId: idSchema,
   aulaId: idSchema,

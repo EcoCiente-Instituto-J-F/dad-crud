@@ -1,3 +1,4 @@
+import CardColetasHoje from "../../components/CardColetasHoje";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CalendarDays, FileImage, UsersRound } from "lucide-react";
@@ -83,40 +84,7 @@ export default function Home() {
     return 260 - (valor / maiorValor) * 210;
   }
 
-  const indicadores = [
-    {
-      nome: "Usuários",
-      valor: dados.usuarios,
-      caminho: "/usuarios",
-    },
-    {
-      nome: "Condomínios",
-      valor: dados.condominios,
-      caminho: "/condominios",
-    },
-    {
-      nome: "Cooperativas",
-      valor: dados.cooperativas,
-      caminho: "/cooperativas",
-    },
-    {
-      nome: "Cursos",
-      valor: dados.cursos,
-      caminho: "/cursos",
-    },
-    {
-      nome: "Quizzes",
-      valor: dados.quizzes,
-      caminho: "/quizzes",
-    },
-    {
-      nome: "Agendamentos",
-      valor: dados.agendamentos,
-      caminho: "/coletas",
-    },
-  ];
-
-  return (
+return (
     <section className="home-referencia">
       <div className="pagina-cabecalho">
         <h1 className="home-saudacao">
@@ -290,26 +258,12 @@ export default function Home() {
               </strong>
             </div>
           </section>
+
+          <CardColetasHoje />
         </div>
       </div>
 
-      <div className="home-totais-api">
-        {indicadores.map((indicador) => (
-          <Link
-            className="home-card home-total-api"
-            key={indicador.caminho}
-            to={indicador.caminho}
-          >
-            <span>{indicador.nome}</span>
-
-            <strong>
-              {indicador.valor.toLocaleString("pt-BR")}
-            </strong>
-          </Link>
-        ))}
-      </div>
-
-      <section className="home-card home-recentes">
+<section className="home-card home-recentes">
         <h2>Usuários recentes</h2>
 
         <div className="tabela-container">
@@ -318,7 +272,7 @@ export default function Home() {
               <tr>
                 <th scope="col">ID</th>
                 <th scope="col">Nome</th>
-                <th scope="col">E-mail</th>
+                <th scope="col">Data de cadastro</th>
                 <th scope="col">Tipo</th>
                 <th scope="col">Situação</th>
               </tr>
@@ -345,7 +299,15 @@ export default function Home() {
                     </Link>
                   </td>
 
-                  <td>{usuario.email}</td>
+                  <td>
+                    {usuario.registroEm &&
+                    !Number.isNaN(Date.parse(usuario.registroEm))
+                      ? new Intl.DateTimeFormat("pt-BR", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        }).format(new Date(usuario.registroEm))
+                      : "—"}
+                  </td>
                   <td>{usuario.tipo}</td>
                   <td>{usuario.ativo ? "Ativo" : "Inativo"}</td>
                 </tr>

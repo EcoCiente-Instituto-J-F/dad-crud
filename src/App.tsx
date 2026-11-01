@@ -24,13 +24,16 @@ const CooperativaFormulario = lazy(() => import("./pages/CooperativaFormulario")
 const CooperativaDetalhes = lazy(() => import("./pages/CooperativasDetalhes"));
 
 const Cursos = lazy(() => import("./pages/Cursos"));
+const AulaFormulario = lazy(() => import("./pages/AulaFormulario"));
 const CursoFormulario = lazy(() => import("./pages/CursoFormulario"));
 const CursoDetalhes = lazy(() => import("./pages/CursoDetalhes"));
 
 const Quizzes = lazy(() => import("./pages/Quizzes"));
+const QuizDetalhes = lazy(() => import("./pages/QuizDetalhes"));
 const QuizFormulario = lazy(() => import("./pages/QuizFormulario"));
 
 const Coletas = lazy(() => import("./pages/Coletas"));
+const CalendarioColetas = lazy(() => import("./pages/CalendarioColetas"));
 const ColetaFormulario = lazy(() => import("./pages/ColetaFormulario"));
 const ColetaDetalhes = lazy(() => import("./pages/ColetaDetalhes"));
 
@@ -88,11 +91,20 @@ export default function App() {
             />
             <Route path="/cursos/:id" element={<CursoDetalhes />} />
             <Route
+              path="/cursos/:id/aulas/cadastrar"
+              element={<AulaFormulario />}
+            />
+            <Route
+              path="/cursos/:id/aulas/:aulaId/editar"
+              element={<AulaFormulario />}
+            />
+            <Route
               path="/cursos/:id/editar"
               element={<CursoFormulario key="edicao" modo="edicao" />}
             />
 
             <Route path="/quizzes" element={<Quizzes />} />
+            <Route path="/quizzes/:id" element={<QuizDetalhes />} />
             <Route
               path="/quizzes/cadastrar"
               element={<QuizFormulario key="cadastro" modo="cadastro" />}
@@ -103,6 +115,7 @@ export default function App() {
             />
 
             <Route path="/coletas" element={<Coletas />} />
+            <Route path="/coletas/calendario" element={<CalendarioColetas />} />
             <Route
               path="/coletas/cadastrar"
               element={<ColetaFormulario key="cadastro" modo="cadastro" />}
