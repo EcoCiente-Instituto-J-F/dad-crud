@@ -16,6 +16,7 @@ export interface ListagemApiProps<T extends { id: number }> {
   busca: string;
   onBuscaChange: (valor: string) => void;
   filtrosExtras?: ReactNode;
+  acoesExtras?: ReactNode;
   requisicao: EstadoRequisicao<PaginaApi<T>>;
   colunas: readonly ColunaListagemApi<T>[];
   onRecarregar: () => void;

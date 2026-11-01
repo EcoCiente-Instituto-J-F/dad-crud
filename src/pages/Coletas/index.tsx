@@ -99,6 +99,11 @@ export default function Coletas() {
 
       <ListagemApi
         titulo="Coletas"
+        acoesExtras={
+          <Link className="botao" to="/coletas/calendario">
+            Calendário
+          </Link>
+        }
         descricao="Gerencie agendamentos e acompanhe as visitas."
         caminhoCadastro="/coletas/cadastrar"
         busca={filtros.busca ?? ""}

@@ -1,3 +1,4 @@
+import ImportarUsuarios from "../../components/ImportarUsuarios";
 import { RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -39,6 +40,7 @@ export default function Usuarios() {
         </div>
 
         <div className="acoes-pagina">
+          <ImportarUsuarios onConcluido={recarregar} />
           <button
             type="button"
             className="botao"

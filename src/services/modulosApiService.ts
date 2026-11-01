@@ -252,6 +252,10 @@ export const coletasApi = {
   ) {
     validarId(id);
 
+    if (dados.confirmada && !dados.realizada) {
+      throw new Error("Não confirme uma visita que não foi realizada.");
+    }
+
     if (!dados.realizada && !dados.observacao?.trim()) {
       throw new Error(
         "Informe uma observação quando a visita não aconteceu.",

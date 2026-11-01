@@ -7,6 +7,7 @@ import App from "./App";
 import AuthProvider from "./components/AuthProvider";
 
 import "../styles/global.css";
+import "../styles/admin-referencia.css";
 
 const elementoRaiz = document.getElementById("root");
 
