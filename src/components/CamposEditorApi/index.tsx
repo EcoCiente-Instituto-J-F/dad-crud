@@ -1,9 +1,10 @@
-import { useId, useState } from "react";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
-import Modal from "../Modal";
-import { converterDataLocal, preencherDataLocal } from "../../utils/datasApi";
-import { nomeItem } from "../../utils/camposVisuais";
+import { ChevronDown,ChevronUp,Plus,Trash2 } from "lucide-react";
+import { useId,useState } from "react";
 import type { CamposVisuaisProps } from "../../types/visualAdmin";
+import { nomeItem } from "../../utils/camposVisuais";
+import { converterDataLocal,preencherDataLocal } from "../../utils/datasApi";
+import { chaveItemEditor,prepararItensEditor } from "../../utils/itensEditor";
+import Modal from "../Modal";
 
 function objeto(valor: unknown): Record<string, unknown> {
   return typeof valor === "object" && valor !== null && !Array.isArray(valor) ? valor as Record<string, unknown> : {};
@@ -44,7 +45,7 @@ export default function CamposEditorApi({ campos, dados, onChange, leitura = fal
         return <section className="secao-formulario visual-secao" key={campo.chave}>
           <div className="visual-secao-titulo"><h2>{campo.titulo}</h2><span>{itens.length}</span></div>
           {itens.length === 0 && <p className="pagina-descricao">Nenhum item adicionado.</p>}
-          {itens.map((item, indice) => <section className="ponto-editor visual-item" key={`${String(item.id ?? "novo")}-${indice}`}>
+          {itens.map((item, indice) => <section className="ponto-editor visual-item" key={chaveItemEditor(item)}>
             <div className="visual-item-topo"><h3>{nomeItem(campo.chave)} {indice + 1}</h3>
               {!leitura && <div className="visual-item-acoes">
                 <button type="button" className="botao" aria-label={`Subir ${nomeItem(campo.chave)}`} disabled={indice === 0} onClick={() => mover(indice, -1)}><ChevronUp size={17} /></button>
@@ -54,7 +55,7 @@ export default function CamposEditorApi({ campos, dados, onChange, leitura = fal
             </div>
             <CamposEditorApi campos={campo.campos ?? []} dados={item} leitura={leitura} onChange={(novo) => atualizar(indice, novo)} />
           </section>)}
-          {!leitura && <button type="button" className="botao" onClick={() => alterar(campo.chave, [...itens, structuredClone(campo.novo ?? {})])}><Plus size={16} />Adicionar {nomeItem(campo.chave).toLocaleLowerCase()}</button>}
+          {!leitura && <button type="button" className="botao" onClick={() => alterar(campo.chave, [...itens, ...((prepararItensEditor({ itens: [structuredClone(campo.novo ?? {})] }).itens) as Record<string, unknown>[])])}><Plus size={16} />Adicionar {nomeItem(campo.chave).toLocaleLowerCase()}</button>}
         </section>;
       }
       if (campo.tipo === "multiselect") {

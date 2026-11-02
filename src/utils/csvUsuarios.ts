@@ -1,5 +1,6 @@
-import { colunasImportacao, usuarioImportacaoSchema } from "../types/importacaoUsuarios";
 import type { LinhaImportacao } from "../types/importacaoUsuarios";
+import { colunasImportacao } from "../types/importacaoUsuarios";
+import { usuarioImportacaoSchema } from "./validarUsuarioApi";
 
 export function lerCsvUsuarios(texto: string): LinhaImportacao[] {
   const fonte = texto.replace(/^\uFEFF/, "");

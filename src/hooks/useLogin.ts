@@ -1,16 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect,useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { Estado } from "../types/useLoginContratos";
 
-import { useAuth } from "./useAuth";
 import { validarCredenciais } from "../utils/validarAuth";
+import { useAuth } from "./useAuth";
 
 import type { Credenciais } from "../types/auth";
 
-type Estado =
-  | { status: "pronto" }
-  | { status: "carregando" }
-  | { status: "sucesso" }
-  | { status: "erro"; mensagem: string };
+
 
 export function useLogin() {
   const { entrar } = useAuth();

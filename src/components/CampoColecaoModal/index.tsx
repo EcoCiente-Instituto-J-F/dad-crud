@@ -1,9 +1,9 @@
 import { useState } from "react";
-import Modal from "../Modal";
+import type { CampoColecaoModalProps } from "../../types/campoColecaoModalContratos";
 import CamposEditorApi from "../CamposEditorApi";
-import type { CampoEditor } from "../../types/editorModulo";
+import Modal from "../Modal";
 
-export default function CampoColecaoModal({ campo, dados, onChange }: { campo: CampoEditor; dados: Record<string, unknown>; onChange: (dados: Record<string, unknown>) => void }) {
+export default function CampoColecaoModal({ campo, dados, onChange }: CampoColecaoModalProps) {
   const [aberto, setAberto] = useState(false);
   const [rascunho, setRascunho] = useState<Record<string, unknown>>({});
   const valor = dados[campo.chave];

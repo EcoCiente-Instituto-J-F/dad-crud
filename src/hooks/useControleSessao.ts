@@ -1,20 +1,19 @@
-import { useEffect, useReducer } from "react";
+import { useEffect,useReducer } from "react";
+import { EVENTO_SESSAO } from "../services/sessaoService";
 
 import { autenticar } from "../services/loginService";
 
 import {
-  lerSessao,
-  removerSessao,
-  salvarSessao,
+lerSessao,
+removerSessao,
+salvarSessao,
 } from "../services/sessaoService";
 
 import type {
-  AcaoAuth,
-  AuthContextValue,
-  Credenciais,
-  DadosPerfil,
-  DadosSenha,
-  EstadoAuth,
+AcaoAuth,
+AuthContextValue,
+Credenciais,
+EstadoAuth
 } from "../types/auth";
 
 function reducer(
@@ -60,6 +59,19 @@ export function useControleSessao(): AuthContextValue {
     estadoInicial,
   );
 
+  useEffect(() => {
+    function sincronizar(): void {
+      const sessao = lerSessao();
+      dispatch(sessao ? { tipo: "ATUALIZAR", sessao } : { tipo: "SAIR" });
+    }
+    window.addEventListener(EVENTO_SESSAO, sincronizar);
+    window.addEventListener("storage", sincronizar);
+    return () => {
+      window.removeEventListener(EVENTO_SESSAO, sincronizar);
+      window.removeEventListener("storage", sincronizar);
+    };
+  }, []);
+
   function sair(): void {
     limparSessao();
     dispatch({ tipo: "SAIR" });
@@ -94,39 +106,9 @@ export function useControleSessao(): AuthContextValue {
     dispatch({ tipo: "ENTRAR", sessao });
   }
 
-  async function atualizarPerfil(
-    _dados: DadosPerfil,
-    _signal: AbortSignal,
-  ): Promise<void> {
-    throw new Error(
-      "A edição de perfil ainda não foi integrada à API.",
-    );
-  }
-
-  async function atualizarAvatar(
-    _arquivo: File,
-    _signal: AbortSignal,
-  ): Promise<void> {
-    throw new Error(
-      "A alteração de avatar ainda não foi integrada à API.",
-    );
-  }
-
-  async function alterarSenha(
-    _dados: DadosSenha,
-    _signal: AbortSignal,
-  ): Promise<void> {
-    throw new Error(
-      "A alteração de senha ainda não foi integrada à API.",
-    );
-  }
-
   return {
     estado,
     entrar,
     sair,
-    atualizarPerfil,
-    atualizarAvatar,
-    alterarSenha,
   };
 }

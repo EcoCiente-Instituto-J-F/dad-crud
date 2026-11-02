@@ -51,18 +51,7 @@ export interface AuthContextValue {
     signal: AbortSignal,
   ) => Promise<void>;
   sair: () => void;
-  atualizarPerfil: (
-    dados: DadosPerfil,
-    signal: AbortSignal,
-  ) => Promise<void>;
-  atualizarAvatar: (
-    arquivo: File,
-    signal: AbortSignal,
-  ) => Promise<void>;
-  alterarSenha: (
-    dados: DadosSenha,
-    signal: AbortSignal,
-  ) => Promise<void>;
+
 }
 
 export interface AuthProviderProps {

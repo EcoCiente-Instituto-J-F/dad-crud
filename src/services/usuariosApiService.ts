@@ -1,13 +1,14 @@
 import { z } from "zod";
+import { editarUsuarioSchema,usuarioImportacaoSchema } from "../utils/validarUsuarioApi";
 
 import { requisitarDad } from "./httpService";
 
 import type {
-  CriarUsuarioApi,
-  EditarUsuarioApi,
-  FiltrosUsuariosApi,
-  PaginaApi,
-  UsuarioApi,
+CriarUsuarioApi,
+EditarUsuarioApi,
+FiltrosUsuariosApi,
+PaginaApi,
+UsuarioApi,
 } from "../types/usuarioApi";
 
 const enderecoSchema = z.object({
@@ -142,7 +143,7 @@ export async function criarUsuarioApi(
   try {
     const resposta = await requisitarDad(BASE, {
       method: "POST",
-      body: JSON.stringify(dados),
+      body: JSON.stringify(usuarioImportacaoSchema.parse(dados)),
       signal,
     });
 
@@ -162,7 +163,7 @@ export async function editarUsuarioApi(
 
     const resposta = await requisitarDad(`${BASE}/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(dados),
+      body: JSON.stringify(editarUsuarioSchema.parse(dados)),
       signal,
     });
 

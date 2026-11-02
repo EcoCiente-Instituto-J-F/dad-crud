@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback,useState } from "react";
+import { buscarColetasCalendario,calendarioOcorrenciasAtivo } from "../services/calendarioColetasService";
 import { useConsulta } from "./useConsulta";
-import { buscarColetasCalendario } from "../services/calendarioColetasService";
 export function useCalendarioColetas() {
   const [mes, setMes] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [statusId, setStatusId] = useState<number | undefined>();
@@ -12,7 +12,7 @@ export function useCalendarioColetas() {
     return buscarColetasCalendario(inicio.toISOString(), fim.toISOString(), statusId, signal, condominioId, cooperativaId);
   }, [ano, numeroMes, statusId, condominioId, cooperativaId]);
   const consulta = useConsulta(consultar);
-  return { ...consulta, mes, statusId, setStatusId, condominioId, setCondominioId, cooperativaId, setCooperativaId,
+  return { ...consulta, ocorrenciasAtivas: calendarioOcorrenciasAtivo, mes, statusId, setStatusId, condominioId, setCondominioId, cooperativaId, setCooperativaId,
     mudarMes: (valor: number) => setMes((anterior) => new Date(anterior.getFullYear(), anterior.getMonth() + valor, 1)),
     irParaHoje: () => setMes(new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
   };

@@ -1,22 +1,23 @@
-import { Suspense, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
 import {
-  BookOpen,
-  Building2,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  CircleHelp,
-  House,
-  LogOut,
-  Recycle,
-  UsersRound,
+BookOpen,
+Building2,
+CalendarDays,
+ChevronLeft,
+ChevronRight,
+CircleHelp,
+House,
+LogOut,
+Recycle,
+UsersRound,
 } from "lucide-react";
+import { Suspense,useState } from "react";
+import { Outlet,useNavigate } from "react-router-dom";
+import MensagemOperacao from "../MensagemOperacao";
 
+import { useAuth } from "../../hooks/useAuth";
 import Cabecalho from "../Cabecalho";
 import MenuLateral from "../MenuLateral";
 import Modal from "../Modal";
-import { useAuth } from "../../hooks/useAuth";
 
 import type { ItemMenu } from "../../types/layout";
 
@@ -87,6 +88,7 @@ export default function Layout() {
               </p>
             }
           >
+            <MensagemOperacao />
             <Outlet />
           </Suspense>
         </main>

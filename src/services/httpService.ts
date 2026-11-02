@@ -1,5 +1,5 @@
 import { apiConfig } from "./apiConfig";
-import { lerSessao, removerSessao } from "./sessaoService";
+import { encerrarSessao,lerSessao } from "./sessaoService";
 
 export class ErroHttp extends Error {
   readonly status: number;
@@ -37,13 +37,8 @@ function extrairCampos(valor: unknown): Record<string, string> {
   return campos;
 }
 
-function exigirLogin(): never {
-  try {
-    removerSessao();
-  } finally {
-    window.location.replace("/login");
-  }
-
+function exigirLogin(token?: string): never {
+  encerrarSessao(token);
   throw new ErroHttp(401, "Sua sessão expirou. Entre novamente.");
 }
 
@@ -97,7 +92,7 @@ export async function requisitarDad(
   }
 
   if (resposta.status === 401) {
-    return exigirLogin();
+    return exigirLogin(sessao.token);
   }
 
   const texto = await resposta.text();

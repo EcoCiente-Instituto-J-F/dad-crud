@@ -1,9 +1,8 @@
 import EditorModuloApi from "../../components/EditorModuloApi";
+import type { CooperativaFormularioProps } from "../../types/cooperativaFormularioContratos";
 
 export default function CooperativaFormulario({
   modo,
-}: {
-  modo: "cadastro" | "edicao";
-}) {
+}: CooperativaFormularioProps) {
   return <EditorModuloApi modulo="cooperativas" modo={modo} />;
 }

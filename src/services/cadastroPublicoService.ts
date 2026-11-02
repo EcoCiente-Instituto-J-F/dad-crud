@@ -1,28 +1,10 @@
+import type { CadastroPublico } from "../types/cadastroPublicoServiceContratos";
+import { validarCadastroPessoa } from "../utils/validarCadastroPessoa";
 import { apiConfig } from "./apiConfig";
 
-export interface DadosCadastroPublico {
-  nomeUsuario: string;
-  email: string;
-  senha: string;
-  dataNascimento: string;
-  cpf: string;
-}
 
-export type CadastroPublico =
-  | {
-      possuiVinculo: true;
-      dados: DadosCadastroPublico & {
-        codigoCondominio: string;
-      };
-    }
-  | {
-      possuiVinculo: false;
-      dados: DadosCadastroPublico & {
-        cep: string;
-        numero: string;
-        complemento: string | null;
-      };
-    };
+
+
 
 function obterMensagem(valor: unknown): string | null {
   if (
@@ -49,6 +31,13 @@ export async function cadastrarPessoa(
   signal: AbortSignal,
 ): Promise<void> {
   try {
+    const validacao = validarCadastroPessoa({ ...cadastro.dados, possuiVinculo: cadastro.possuiVinculo,
+      codigoCondominio: "codigoCondominio" in cadastro.dados ? cadastro.dados.codigoCondominio : "",
+      cep: "cep" in cadastro.dados ? cadastro.dados.cep : "",
+      numero: "numero" in cadastro.dados ? cadastro.dados.numero : "",
+      complemento: "complemento" in cadastro.dados ? cadastro.dados.complemento ?? "" : "",
+    });
+    if (!validacao.valido) throw new Error(Object.entries(validacao.erros).map(([campo, texto]) => `${campo}: ${texto}`).join(" • "));
     const rota = cadastro.possuiVinculo ? "morador" : "comum";
 
     const resposta = await fetch(
@@ -59,7 +48,7 @@ export async function cadastrarPessoa(
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(cadastro.dados),
+        body: JSON.stringify(validacao.dados.cadastro.dados),
         signal,
       },
     );

@@ -1,12 +1,10 @@
 import { Link } from "react-router-dom";
+import type { TabelaUsuariosApiProps } from "../../types/tabelaUsuariosApiContratos";
 
 import { obterIniciais } from "../../utils/usuarios";
 
-import type { UsuarioApi } from "../../types/usuarioApi";
 
-interface TabelaUsuariosApiProps {
-  usuarios: readonly UsuarioApi[];
-}
+
 
 export default function TabelaUsuariosApi({
   usuarios,

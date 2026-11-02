@@ -257,3 +257,10 @@ export interface VisitaRequestApi {
   confirmada: boolean;
   observacao: string | null;
 }
+
+export interface RecursoApi<T, D> {
+  listar: (filtros: FiltrosPaginaApi, signal: AbortSignal) => Promise<import("./usuarioApi").PaginaApi<T>>;
+  buscar: (id: number, signal: AbortSignal) => Promise<T>;
+  criar: (dados: D, signal: AbortSignal) => Promise<T>;
+  editar: (id: number, dados: D, signal: AbortSignal) => Promise<T>;
+}

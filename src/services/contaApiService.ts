@@ -1,11 +1,12 @@
+import { emailContaSchema,esquemasConta } from "../utils/validarContaApi";
 import { apiConfig } from "./apiConfig";
 import { ErroHttp } from "./httpService";
-import { lerSessao, removerSessao } from "./sessaoService";
+import { encerrarSessao,lerSessao } from "./sessaoService";
 
 import type {
-  AlterarSenhaApi,
-  AtualizarPerfilApi,
-  RedefinirSenhaApi,
+AlterarSenhaApi,
+AtualizarPerfilApi,
+RedefinirSenhaApi,
 } from "../types/perfilApi";
 
 function extrairErro(valor: unknown): {
@@ -55,7 +56,7 @@ async function enviar(
 
     if (autenticado) {
       if (!sessao) {
-        window.location.replace("/login");
+        encerrarSessao();
         throw new ErroHttp(401, "Entre novamente.");
       }
 
@@ -76,8 +77,7 @@ async function enviar(
       const atual = lerSessao();
 
       if (atual?.token === sessao?.token) {
-        removerSessao();
-        window.location.replace("/login");
+        encerrarSessao(sessao?.token);
       }
 
       throw new ErroHttp(401, "Sua sessão expirou.");
@@ -124,7 +124,7 @@ export function atualizarMeuPerfilApi(
   return enviar(
     `${apiConfig.cadastro}/api/usuarios/me`,
     "PATCH",
-    dados,
+    esquemasConta.perfil.parse(dados),
     signal,
     true,
   );
@@ -137,7 +137,7 @@ export function alterarMinhaSenhaApi(
   return enviar(
     `${apiConfig.senha}/senhas/alterar`,
     "POST",
-    dados,
+    esquemasConta.senha.parse(dados),
     signal,
     true,
   );
@@ -150,7 +150,7 @@ export function solicitarRecuperacaoApi(
   return enviar(
     `${apiConfig.senha}/senhas/esqueceu`,
     "POST",
-    { email },
+    { email: emailContaSchema.parse(email) },
     signal,
     false,
   );
@@ -163,7 +163,7 @@ export function redefinirSenhaApi(
   return enviar(
     `${apiConfig.senha}/senhas/redefinir`,
     "POST",
-    dados,
+    esquemasConta.redefinicao.parse(dados),
     signal,
     false,
   );

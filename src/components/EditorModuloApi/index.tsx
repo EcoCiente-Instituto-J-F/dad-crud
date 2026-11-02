@@ -1,16 +1,16 @@
-import { Link, useParams } from "react-router-dom";
-import CamposEditorApi from "../CamposEditorApi";
-import CampoColecaoModal from "../CampoColecaoModal";
-import DetalhesRegistroVisual from "../DetalhesRegistroVisual";
-import EstadoRequisicao from "../EstadoRequisicao";
-import PreviaQuiz from "../PreviaQuiz";
+import { Link,useParams } from "react-router-dom";
 import { useCatalogos } from "../../hooks/useCatalogos";
 import { useEditorModulo } from "../../hooks/useEditorModulo";
 import { useReferenciasAdmin } from "../../hooks/useReferenciasAdmin";
-import { configurarEditor } from "../../utils/configurarEditor";
-import { adaptarCamposVisuais } from "../../utils/camposVisuais";
-import type { NomeModulo } from "../../types/editorModulo";
+import type { EditorModuloApiProps } from "../../types/editorModuloApiContratos";
 import type { ConteudoVisualProps } from "../../types/visualAdmin";
+import { adaptarCamposVisuais } from "../../utils/camposVisuais";
+import { configurarEditor } from "../../utils/configurarEditor";
+import CampoColecaoModal from "../CampoColecaoModal";
+import CamposEditorApi from "../CamposEditorApi";
+import DetalhesRegistroVisual from "../DetalhesRegistroVisual";
+import EstadoRequisicao from "../EstadoRequisicao";
+import PreviaQuiz from "../PreviaQuiz";
 
 function Conteudo({ modulo, id, leitura, configuracao }: ConteudoVisualProps) {
   const editor = useEditorModulo(modulo, id, configuracao.inicial);
@@ -65,9 +65,9 @@ function Conteudo({ modulo, id, leitura, configuracao }: ConteudoVisualProps) {
   </section>;
 }
 
-export default function EditorModuloApi({ modulo, modo = "cadastro", leitura = false }: { modulo: NomeModulo; modo?: "cadastro" | "edicao"; leitura?: boolean }) {
+export default function EditorModuloApi({ modulo, modo = "cadastro", leitura = false }: EditorModuloApiProps) {
   const parametros = useParams(); const catalogos = useCatalogos();
-  const usaId = leitura || modo === "edicao"; const id = usaId ? Number(parametros.id) : null;
+  const usaId = leitura || modo === "edicao"; const id = usaId && parametros.id ? Number(parametros.id) : null;
   if (usaId && (id === null || !Number.isSafeInteger(id) || id <= 0)) return <EstadoRequisicao estado="erro" mensagem="Identificação inválida." />;
   if (catalogos.requisicao.status === "carregando") return <EstadoRequisicao estado="carregando" />;
   if (catalogos.requisicao.status === "erro") return <EstadoRequisicao estado="erro" mensagem={catalogos.requisicao.mensagem} onTentarNovamente={catalogos.recarregar} />;

@@ -1,12 +1,10 @@
 import { useState } from "react";
-import Modal from "../Modal";
-import CamposEditorApi from "../CamposEditorApi";
 import { useSalvarSecaoRegistro } from "../../hooks/useSalvarSecaoRegistro";
-import type { CampoEditor, NomeModulo } from "../../types/editorModulo";
+import type { SecaoRegistroModalProps } from "../../types/secaoRegistroModalContratos";
+import CamposEditorApi from "../CamposEditorApi";
+import Modal from "../Modal";
 
-export default function SecaoRegistroModal({ modulo, id, campo, dados, onRecarregar }: {
-  modulo: NomeModulo; id: number; campo: CampoEditor; dados: Record<string, unknown>; onRecarregar: () => void;
-}) {
+export default function SecaoRegistroModal({ modulo, id, campo, dados, onRecarregar }: SecaoRegistroModalProps) {
   const [aberto, setAberto] = useState(false);
   const [rascunho, setRascunho] = useState<Record<string, unknown>>({});
   const acao = useSalvarSecaoRegistro(modulo, id);

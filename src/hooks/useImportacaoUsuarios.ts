@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { lerCsvUsuarios } from "../utils/csvUsuarios";
-import { importarUsuarios } from "../services/importacaoUsuariosService";
+import { useEffect,useRef,useState } from "react";
+import { importacaoAtiva,importarUsuarios } from "../services/importacaoUsuariosService";
 import type { LinhaImportacao } from "../types/importacaoUsuarios";
 import type { CriarUsuarioApi } from "../types/usuarioApi";
+import { lerCsvUsuarios } from "../utils/csvUsuarios";
 
 export function useImportacaoUsuarios() {
   const [linhas, setLinhas] = useState<LinhaImportacao[]>([]); const [mensagem, setMensagem] = useState(""); const [salvando, setSalvando] = useState(false); const [lendo, setLendo] = useState(false); const [sucesso, setSucesso] = useState<number | null>(null);
@@ -28,5 +28,5 @@ export function useImportacaoUsuarios() {
     } catch (erro: unknown) { if (!controller.signal.aborted) setMensagem(erro instanceof Error ? erro.message : "Falha ao importar."); }
     finally { if (controle.current === controller) controle.current = null; if (!controller.signal.aborted) setSalvando(false); }
   }
-  return { linhas, mensagem, salvando, lendo, sucesso, selecionar, enviar };
+  return { importacaoAtiva, linhas, mensagem, salvando, lendo, sucesso, selecionar, enviar };
 }
