@@ -39,7 +39,7 @@ export default function Cabecalho() {
       >
         <img
           className="marca__logo"
-          src="/ecociente-logo.png"
+          src={`${import.meta.env.BASE_URL}ecociente-logo.png`}
           alt="EcoCiente"
         />
       </Link>
