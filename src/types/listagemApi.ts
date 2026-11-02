@@ -12,7 +12,7 @@ export interface ColunaListagemApi<T> {
 export interface ListagemApiProps<T extends { id: number }> {
   titulo: string;
   descricao: string;
-  caminhoCadastro: string;
+  caminhoCadastro?: string;
   busca: string;
   onBuscaChange: (valor: string) => void;
   filtrosExtras?: ReactNode;
