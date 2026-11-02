@@ -1,0 +1,73 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Verify frontend
+        run: npm run verificar && npm run lint && npm test
+
+      - name: Build for GitHub Pages
+        run: npm run build -- --mode pages
+        env:
+          VITE_DAD_API_URL: ${{ vars.VITE_DAD_API_URL }}
+          VITE_AUTH_API_URL: ${{ vars.VITE_AUTH_API_URL }}
+          VITE_CADASTRO_API_URL: ${{ vars.VITE_CADASTRO_API_URL }}
+          VITE_SENHA_API_URL: ${{ vars.VITE_SENHA_API_URL }}
+          VITE_MODO_DEMO: 'false'
+          VITE_CALENDARIO_OCORRENCIAS_ATIVO: 'false'
+          VITE_IMPORTACAO_USUARIOS_ATIVA: 'false'
+
+      - name: Check built artifacts
+        shell: bash
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+          grep -q '/dad-crud/assets/' dist/index.html
+          grep -q '/dad-crud/ecomente.png' dist/index.html
+          touch dist/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
