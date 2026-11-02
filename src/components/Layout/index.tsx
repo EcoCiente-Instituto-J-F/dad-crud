@@ -13,6 +13,10 @@ UsersRound,
 import { Suspense,useState } from "react";
 import { Outlet,useNavigate } from "react-router-dom";
 import MensagemOperacao from "../MensagemOperacao";
+import PainelAcessibilidade from "../PainelAcessibilidade";
+import RecursosLeitura from "../RecursosLeitura";
+import IndicadorFocoTeclado from "../IndicadorFocoTeclado";
+import MascoteEko from "../MascoteEko";
 
 import { useAuth } from "../../hooks/useAuth";
 import Cabecalho from "../Cabecalho";
@@ -39,6 +43,7 @@ export default function Layout() {
 
   return (
     <div className="aplicacao">
+      <a href="#conteudo-principal" className="link-pular-conteudo">Pular para o conteúdo principal</a>
       <Cabecalho />
 
       <div
@@ -80,7 +85,7 @@ export default function Layout() {
           </div>
         </aside>
 
-        <main className="conteudo">
+        <main className="conteudo" id="conteudo-principal" tabIndex={-1}>
           <Suspense
             fallback={
               <p className="mensagem-carregamento" role="status">
@@ -97,6 +102,11 @@ export default function Layout() {
       <footer className="rodape">
         EcoCiente — dados que despertam consciência
       </footer>
+
+      <PainelAcessibilidade />
+      <RecursosLeitura />
+      <MascoteEko />
+      <IndicadorFocoTeclado />
 
       <Modal
         aberto={confirmarSaida}
