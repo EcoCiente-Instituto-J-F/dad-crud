@@ -1,12 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect,useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { validarSchema } from "../utils/validarSchema";
+import { editarUsuarioSchema } from "../utils/validarUsuarioApi";
 
-import { editarUsuarioApi } from "../services/usuariosApiService";
 import { ErroHttp } from "../services/httpService";
+import { editarUsuarioApi } from "../services/usuariosApiService";
 
 import type {
-  EditarUsuarioApi,
-  UsuarioApi,
+EditarUsuarioApi,
+UsuarioApi,
 } from "../types/usuarioApi";
 
 export function useEdicaoUsuarioApi(usuario: UsuarioApi) {
@@ -50,63 +52,16 @@ export function useEdicaoUsuarioApi(usuario: UsuarioApi) {
   async function salvar(): Promise<void> {
     if (operacao.current) return;
 
-    const novosErros: Record<string, string> = {};
-    const cep = formulario.cep.replace(/\D/g, "");
-    const uf = formulario.uf.trim().toUpperCase();
-
-    if (!formulario.nome.trim()) {
-      novosErros.nome = "Informe o nome.";
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formulario.email.trim())) {
-      novosErros.email = "Informe um e-mail válido.";
-    }
-
-    if (cep.length !== 8) {
-      novosErros.cep = "Informe o CEP com 8 números.";
-    }
-
-    if (!/^[A-Z]{2}$/.test(uf)) {
-      novosErros.uf = "Informe a UF com duas letras.";
-    }
-
-    for (const campo of ["cidade", "logradouro", "numero"] as const) {
-      if (!formulario[campo].trim()) {
-        novosErros[campo] = "Preencha este campo.";
-      }
-    }
-
-    if (formulario.avatar.trim()) {
-      try {
-        const url = new URL(formulario.avatar.trim());
-
-        if (!["http:", "https:"].includes(url.protocol)) {
-          novosErros.avatar = "Informe uma URL HTTP ou HTTPS.";
-        }
-      } catch {
-        novosErros.avatar = "Informe uma URL válida.";
-      }
-    }
-
-    setErros(novosErros);
+    const resultado = validarSchema(editarUsuarioSchema, {
+      nome: formulario.nome, email: formulario.email.trim().toLowerCase(),
+      dataNascimento: formulario.dataNascimento || null, avatar: formulario.avatar.trim() || null,
+      endereco: { cep: formulario.cep.replace(/\D/g, ""), uf: formulario.uf.trim().toUpperCase(), cidade: formulario.cidade,
+        logradouro: formulario.logradouro, numero: formulario.numero, complemento: formulario.complemento.trim() || null },
+    });
     setMensagem("");
-
-    if (Object.keys(novosErros).length > 0) return;
-
-    const dados: EditarUsuarioApi = {
-      nome: formulario.nome.trim(),
-      email: formulario.email.trim().toLowerCase(),
-      dataNascimento: formulario.dataNascimento || null,
-      avatar: formulario.avatar.trim() || null,
-      endereco: {
-        cep,
-        uf,
-        cidade: formulario.cidade.trim(),
-        logradouro: formulario.logradouro.trim(),
-        numero: formulario.numero.trim(),
-        complemento: formulario.complemento.trim() || null,
-      },
-    };
+    setErros(resultado.valido ? {} : Object.fromEntries(Object.entries(resultado.erros).map(([campo, mensagem]) => [campo.replace(/^endereco\./, ""), mensagem])));
+    if (!resultado.valido) return;
+    const dados: EditarUsuarioApi = resultado.dados;
 
     const controller = new AbortController();
     operacao.current = controller;

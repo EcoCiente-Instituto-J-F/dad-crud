@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
+import type { FormularioEdicaoUsuarioApiProps } from "../../types/formularioEdicaoUsuarioApiContratos";
 
-import Campo from "../Campo";
 import { useEdicaoUsuarioApi } from "../../hooks/useEdicaoUsuarioApi";
+import Campo from "../Campo";
 
-import type { UsuarioApi } from "../../types/usuarioApi";
 
-interface FormularioEdicaoUsuarioApiProps {
-  usuario: UsuarioApi;
-}
+
 
 export default function FormularioEdicaoUsuarioApi({
   usuario,

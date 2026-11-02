@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect,useState } from "react";
+import type { UseConsultaRetorno } from "../types/useConsultaContratos";
 
 import type { EstadoRequisicao } from "../types/requisicao";
 
-interface UseConsultaRetorno<T> {
-  requisicao: EstadoRequisicao<T>;
-  recarregar: () => void;
-}
+
 
 export function useConsulta<T>(
   consultar: (signal: AbortSignal) => Promise<T>,

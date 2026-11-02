@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import type { PaginacaoProps } from "../../types/usuario";
+import type { PaginacaoProps } from "../../types/paginacao";
 
 export default function Paginacao({
   paginaAtual,

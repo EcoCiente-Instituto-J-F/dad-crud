@@ -1,6 +1,7 @@
-export {};
+import type { Registro } from "../types/modoDemoContratos";
 
-type Registro = Record<string, unknown>;
+
+
 
 const ambiente = import.meta.env;
 const demo = ambiente.DEV && ambiente["VITE_MODO_DEMO"] === "true";

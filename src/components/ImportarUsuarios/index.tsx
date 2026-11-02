@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Upload } from "lucide-react";
-import Modal from "../Modal";
+import { useState } from "react";
 import { useImportacaoUsuarios } from "../../hooks/useImportacaoUsuarios";
-import { importacaoAtiva } from "../../services/importacaoUsuariosService";
 import { colunasImportacao } from "../../types/importacaoUsuarios";
+import type { ConteudoImportacaoProps,ImportarUsuariosProps } from "../../types/importarUsuariosContratos";
+import Modal from "../Modal";
 
-function ConteudoImportacao({ onConcluido, onFechar }: { onConcluido: () => void; onFechar: () => void }) {
+function ConteudoImportacao({ onConcluido, onFechar }: ConteudoImportacaoProps) {
   const estado = useImportacaoUsuarios();
   const validas = estado.linhas.filter((linha) => linha.dados !== null).length;
   function baixarModelo(): void {
@@ -20,12 +20,12 @@ function ConteudoImportacao({ onConcluido, onFechar }: { onConcluido: () => void
     {estado.mensagem && <p className="mensagem-erro" role="alert">{estado.mensagem}</p>}
     {estado.sucesso !== null && <p className="visual-aviso" role="status">{estado.sucesso} usuário(s) importado(s).</p>}
     {estado.linhas.length > 0 && <><p role="status">{validas} linha(s) válida(s) de {estado.linhas.length}.</p><div className="tabela-container visual-importacao-tabela"><table className="tabela-usuarios"><thead><tr><th>Linha</th><th>Nome</th><th>E-mail</th><th>Validação</th></tr></thead><tbody>{estado.linhas.map((linha) => <tr key={linha.linha}><td>{linha.linha}</td><td>{linha.nome}</td><td>{linha.email}</td><td>{linha.erros.length ? linha.erros.join(" • ") : "Válida"}</td></tr>)}</tbody></table></div></>}
-    {!importacaoAtiva && <p className="visual-aviso visual-aviso--atencao">Envio indisponível no momento. Você pode validar o arquivo e conferir a prévia.</p>}
-    <div className="formulario-acoes"><button type="button" className="botao" disabled={estado.salvando} onClick={onFechar}>Fechar</button><button type="button" className="botao botao--primario" disabled={!importacaoAtiva || estado.lendo || estado.salvando || validas === 0 || validas !== estado.linhas.length} onClick={() => void estado.enviar(onConcluido)}>{estado.salvando ? "Importando..." : "Importar usuários"}</button></div>
+    {!estado.importacaoAtiva && <p className="visual-aviso visual-aviso--atencao">Envio indisponível no momento. Você pode validar o arquivo e conferir a prévia.</p>}
+    <div className="formulario-acoes"><button type="button" className="botao" disabled={estado.salvando} onClick={onFechar}>Fechar</button><button type="button" className="botao botao--primario" disabled={!estado.importacaoAtiva || estado.lendo || estado.salvando || validas === 0 || validas !== estado.linhas.length} onClick={() => void estado.enviar(onConcluido)}>{estado.salvando ? "Importando..." : "Importar usuários"}</button></div>
   </div>;
 }
 
-export default function ImportarUsuarios({ onConcluido }: { onConcluido: () => void }) {
+export default function ImportarUsuarios({ onConcluido }: ImportarUsuariosProps) {
   const [aberto, setAberto] = useState(false);
   return <><button type="button" className="botao" onClick={() => setAberto(true)}><Upload size={16} aria-hidden="true" />Importar</button><Modal aberto={aberto} titulo="Importar usuários" onFechar={() => setAberto(false)}>{aberto && <ConteudoImportacao onConcluido={onConcluido} onFechar={() => setAberto(false)} />}</Modal></>;
 }

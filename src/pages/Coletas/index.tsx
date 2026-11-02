@@ -105,7 +105,6 @@ export default function Coletas() {
           </Link>
         }
         descricao="Gerencie agendamentos e acompanhe as visitas."
-        caminhoCadastro="/coletas/cadastrar"
         busca={filtros.busca ?? ""}
         onBuscaChange={(busca) => alterarFiltros({ busca })}
         requisicao={requisicao}

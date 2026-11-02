@@ -1,18 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { emailContaSchema, validarRedefinicaoApi } from "../utils/validarContaApi";
+import { useEffect,useRef,useState } from "react";
 
 import {
-  redefinirSenhaApi,
-  solicitarRecuperacaoApi,
+redefinirSenhaApi,
+solicitarRecuperacaoApi,
 } from "../services/contaApiService";
 
 export function useRecuperacaoSenha() {
   const operacao = useRef<AbortController | null>(null);
 
   const [etapa, setEtapa] = useState<"email" | "codigo" | "sucesso">("email");
-  const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
-  const [confirmacaoSenha, setConfirmacaoSenha] = useState("");
+  const [formulario, setFormulario] = useState({ email: "", token: "", novaSenha: "", confirmacaoSenha: "" });
+  const { email, token, novaSenha, confirmacaoSenha } = formulario;
+  const setEmail = (email: string): void => setFormulario((atual) => ({ ...atual, email }));
+  const setToken = (token: string): void => setFormulario((atual) => ({ ...atual, token }));
+  const setNovaSenha = (novaSenha: string): void => setFormulario((atual) => ({ ...atual, novaSenha }));
+  const setConfirmacaoSenha = (confirmacaoSenha: string): void => setFormulario((atual) => ({ ...atual, confirmacaoSenha }));
   const [carregando, setCarregando] = useState(false);
   const [mensagem, setMensagem] = useState("");
 
@@ -23,6 +26,13 @@ export function useRecuperacaoSenha() {
   async function enviar(): Promise<void> {
     if (operacao.current || etapa === "sucesso") return;
 
+    if (etapa === "email") {
+      const resultado = emailContaSchema.safeParse(email);
+      if (!resultado.success) { setMensagem(resultado.error.issues[0].message); return; }
+    } else {
+      const resultado = validarRedefinicaoApi({ email, token, novaSenha, confirmacaoSenha });
+      if (!resultado.valido) { setMensagem(Object.entries(resultado.erros).map(([campo, texto]) => `${campo}: ${texto}`).join(" • ")); return; }
+    }
     const controller = new AbortController();
     operacao.current = controller;
 

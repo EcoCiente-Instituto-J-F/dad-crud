@@ -1,16 +1,15 @@
+import { CalendarCheck,CircleAlert } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { CalendarCheck, CircleAlert } from "lucide-react";
+import type { AcoesRegistroApiProps } from "../../types/acoesRegistroApiContratos";
 
-import Modal from "../Modal";
 import { useAcoesRegistroApi } from "../../hooks/useAcoesRegistroApi";
 import { converterDataLocal } from "../../utils/datasApi";
+import Modal from "../Modal";
 
 export default function AcoesRegistroApi({
   modulo,
-}: {
-  modulo: "coletas" | "quizzes";
-}) {
+}: AcoesRegistroApiProps) {
   const { id } = useParams();
   const { executar, salvando, mensagem } =
     useAcoesRegistroApi(modulo, Number(id));

@@ -2,6 +2,8 @@ import { sessaoAdminSchema } from "../utils/validarAuth";
 
 import type { SessaoAdmin } from "../types/auth";
 
+export const EVENTO_SESSAO = "ecociente:sessao-alterada";
+
 const CHAVE = "ecociente:sessao-admin";
 
 export function lerSessao(): SessaoAdmin | null {
@@ -23,6 +25,7 @@ export function lerSessao(): SessaoAdmin | null {
 
     return resultado.data;
   } catch {
+    try { localStorage.removeItem(CHAVE); } catch { /* Armazenamento indisponível. */ }
     return null;
   }
 }
@@ -36,6 +39,7 @@ export function salvarSessao(sessao: SessaoAdmin): void {
 
   try {
     localStorage.setItem(CHAVE, JSON.stringify(resultado.data));
+    window.dispatchEvent(new Event(EVENTO_SESSAO));
   } catch {
     throw new Error(
       "Não foi possível salvar a sessão. Verifique o armazenamento do navegador.",
@@ -44,5 +48,15 @@ export function salvarSessao(sessao: SessaoAdmin): void {
 }
 
 export function removerSessao(): void {
-  localStorage.removeItem(CHAVE);
+  try {
+    localStorage.removeItem(CHAVE);
+  } finally {
+    window.dispatchEvent(new Event(EVENTO_SESSAO));
+  }
+}
+
+/** Uma resposta antiga não pode encerrar um login mais recente. */
+export function encerrarSessao(token?: string): void {
+  if (token !== undefined && lerSessao()?.token !== token) return;
+  removerSessao();
 }

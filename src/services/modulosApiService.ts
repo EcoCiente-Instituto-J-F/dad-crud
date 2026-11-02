@@ -1,26 +1,29 @@
+import type { ColetaApi, CondominioApi, DashboardApi, RecursoApi } from "../types/modulosApi";
+import type { PaginaApi } from "../types/usuarioApi";
 import { z } from "zod";
+import { esquemasModulo } from "../utils/validarModuloApi";
 
 import { requisitarDad } from "./httpService";
 
 import {
-  coletaSchema,
-  condominioSchema,
-  cooperativaSchema,
-  cursoSchema,
-  dashboardSchema,
-  quizSchema,
+coletaSchema,
+condominioSchema,
+cooperativaSchema,
+cursoSchema,
+dashboardSchema,
+quizSchema,
 } from "../types/modulosApi";
 
 import type {
-  ColetaRequestApi,
-  CondominioRequestApi,
-  CooperativaRequestApi,
-  CursoRequestApi,
-  FiltrosColetasApi,
-  FiltrosCondominiosApi,
-  FiltrosPaginaApi,
-  QuizRequestApi,
-  VisitaRequestApi,
+ColetaRequestApi,
+CondominioRequestApi,
+CooperativaRequestApi,
+CursoRequestApi,
+FiltrosColetasApi,
+FiltrosCondominiosApi,
+FiltrosPaginaApi,
+QuizRequestApi,
+VisitaRequestApi,
 } from "../types/modulosApi";
 
 const BASE = "/api/admin/v1";
@@ -112,10 +115,11 @@ function paginaSchema<T>(schema: z.ZodType<T>) {
 function criarModulo<T, D>(
   caminho: string,
   schema: z.ZodType<T>,
+  schemaDados: z.ZodType<D>,
   metodoEdicao: "PATCH" | "PUT" = "PATCH",
-) {
+): RecursoApi<T, D> {
   return {
-    listar(filtros: FiltrosPaginaApi, signal: AbortSignal) {
+    listar(filtros: FiltrosPaginaApi, signal: AbortSignal): Promise<PaginaApi<T>> {
       return consultar(
         `${caminho}?${montarParametros(filtros)}`,
         paginaSchema(schema),
@@ -123,17 +127,17 @@ function criarModulo<T, D>(
       );
     },
 
-    buscar(id: number, signal: AbortSignal) {
+    buscar(id: number, signal: AbortSignal): Promise<T> {
       validarId(id);
 
       return consultar(`${caminho}/${id}`, schema, signal);
     },
 
-    criar(dados: D, signal: AbortSignal) {
-      return consultar(caminho, schema, signal, "POST", dados);
+    criar(dados: D, signal: AbortSignal): Promise<T> {
+      return consultar(caminho, schema, signal, "POST", schemaDados.parse(dados));
     },
 
-    editar(id: number, dados: D, signal: AbortSignal) {
+    editar(id: number, dados: D, signal: AbortSignal): Promise<T> {
       validarId(id);
 
       return consultar(
@@ -141,7 +145,7 @@ function criarModulo<T, D>(
         schema,
         signal,
         metodoEdicao,
-        dados,
+        schemaDados.parse(dados),
       );
     },
   };
@@ -150,12 +154,12 @@ function criarModulo<T, D>(
 const condominiosBase = criarModulo<
   z.infer<typeof condominioSchema>,
   CondominioRequestApi
->("/condominios", condominioSchema);
+>("/condominios", condominioSchema, esquemasModulo.condominio);
 
 export const condominiosApi = {
   ...condominiosBase,
 
-  listar(filtros: FiltrosCondominiosApi, signal: AbortSignal) {
+  listar(filtros: FiltrosCondominiosApi, signal: AbortSignal): Promise<PaginaApi<CondominioApi>> {
     return consultar(
       `/condominios?${montarParametros(filtros, {
         ativo: filtros.ativo,
@@ -165,7 +169,7 @@ export const condominiosApi = {
     );
   },
 
-  alterarStatus(id: number, ativo: boolean, signal: AbortSignal) {
+  alterarStatus(id: number, ativo: boolean, signal: AbortSignal): Promise<CondominioApi> {
     validarId(id);
 
     return consultar(
@@ -181,17 +185,17 @@ export const condominiosApi = {
 export const cooperativasApi = criarModulo<
   z.infer<typeof cooperativaSchema>,
   CooperativaRequestApi
->("/cooperativas", cooperativaSchema);
+>("/cooperativas", cooperativaSchema, esquemasModulo.cooperativa);
 
 export const cursosApi = criarModulo<
   z.infer<typeof cursoSchema>,
   CursoRequestApi
->("/cursos", cursoSchema);
+>("/cursos", cursoSchema, esquemasModulo.curso);
 
 const quizzesBase = criarModulo<
   z.infer<typeof quizSchema>,
   QuizRequestApi
->("/quizzes", quizSchema, "PUT");
+>("/quizzes", quizSchema, esquemasModulo.quiz, "PUT");
 
 export const quizzesApi = {
   ...quizzesBase,
@@ -217,12 +221,12 @@ export const quizzesApi = {
 const coletasBase = criarModulo<
   z.infer<typeof coletaSchema>,
   ColetaRequestApi
->("/coletas", coletaSchema);
+>("/coletas", coletaSchema, esquemasModulo.coleta);
 
 export const coletasApi = {
   ...coletasBase,
 
-  listar(filtros: FiltrosColetasApi, signal: AbortSignal) {
+  listar(filtros: FiltrosColetasApi, signal: AbortSignal): Promise<PaginaApi<ColetaApi>> {
     return consultar(
       `/coletas?${montarParametros(filtros, {
         statusId: filtros.statusId,
@@ -234,7 +238,7 @@ export const coletasApi = {
     );
   },
 
-  cancelar(id: number, signal: AbortSignal) {
+  cancelar(id: number, signal: AbortSignal): Promise<ColetaApi> {
     validarId(id);
 
     return consultar(
@@ -249,7 +253,7 @@ export const coletasApi = {
     id: number,
     dados: VisitaRequestApi,
     signal: AbortSignal,
-  ) {
+  ): Promise<ColetaApi> {
     validarId(id);
 
     if (dados.confirmada && !dados.realizada) {
@@ -275,7 +279,7 @@ export const coletasApi = {
 export function carregarDashboardApi(
   meses: number,
   signal: AbortSignal,
-) {
+): Promise<DashboardApi> {
   if (!Number.isInteger(meses) || meses < 1) {
     throw new Error("Período inválido.");
   }

@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect,useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { FormularioCadastroPessoa } from "../types/cadastroPessoa";
+import { validarCadastroPessoa,validarEtapaPessoa } from "../utils/validarCadastroPessoa";
 
 import { cadastrarPessoa } from "../services/cadastroPublicoService";
 
@@ -11,7 +13,7 @@ export function useCadastroPessoa() {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
 
-  const [formulario, setFormulario] = useState({
+  const [formulario, setFormulario] = useState<FormularioCadastroPessoa>({
     nomeUsuario: "",
     email: "",
     senha: "",
@@ -44,87 +46,17 @@ export function useCadastroPessoa() {
   }
 
   function continuar(): void {
-    const novos: Record<string, string> = {};
-
-    if (!formulario.nomeUsuario.trim()) {
-      novos.nomeUsuario = "Informe o nome completo.";
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formulario.email.trim())) {
-      novos.email = "Informe um e-mail válido.";
-    }
-
-    if (formulario.cpf.replace(/\D/g, "").length !== 11) {
-      novos.cpf = "Informe o CPF com 11 números.";
-    }
-
-    if (!formulario.dataNascimento) {
-      novos.dataNascimento = "Informe a data de nascimento.";
-    } else {
-      const data = new Date(`${formulario.dataNascimento}T12:00:00`);
-      const hoje = new Date();
-
-      let idade = hoje.getFullYear() - data.getFullYear();
-
-      if (
-        hoje.getMonth() < data.getMonth() ||
-        (
-          hoje.getMonth() === data.getMonth() &&
-          hoje.getDate() < data.getDate()
-        )
-      ) {
-        idade -= 1;
-      }
-
-      if (Number.isNaN(data.getTime()) || idade < 10) {
-        novos.dataNascimento = "A idade mínima é de 10 anos.";
-      }
-    }
-
-    if (
-      formulario.senha.length < 8 ||
-      !/[a-z]/.test(formulario.senha) ||
-      !/[A-Z]/.test(formulario.senha) ||
-      !/\d/.test(formulario.senha) ||
-      !/[^\sa-zA-Z\d]/.test(formulario.senha)
-    ) {
-      novos.senha =
-        "Use ao menos 8 caracteres, maiúscula, minúscula, número e especial.";
-    }
-
-    if (
-      formulario.possuiVinculo &&
-      !formulario.codigoCondominio.trim()
-    ) {
-      novos.codigoCondominio = "Informe o código do condomínio.";
-    }
-
-    setErros(novos);
-
-    if (Object.keys(novos).length === 0) {
-      setMensagem("");
-      setPasso(2);
-    }
+    const resultado = validarEtapaPessoa(formulario);
+    setErros(resultado.valido ? {} : resultado.erros);
+    if (resultado.valido) { setMensagem(""); setPasso(2); }
   }
 
   async function salvar(): Promise<void> {
     if (operacao.current) return;
 
-    const novos: Record<string, string> = {};
-
-    if (!formulario.possuiVinculo) {
-      if (formulario.cep.replace(/\D/g, "").length !== 8) {
-        novos.cep = "Informe o CEP com 8 números.";
-      }
-
-      if (!formulario.numero.trim()) {
-        novos.numero = "Informe o número.";
-      }
-    }
-
-    setErros(novos);
-
-    if (Object.keys(novos).length > 0) return;
+    const resultado = validarCadastroPessoa(formulario);
+    setErros(resultado.valido ? {} : resultado.erros);
+    if (!resultado.valido) { setPasso(1); return; }
 
     const controller = new AbortController();
     operacao.current = controller;
@@ -132,44 +64,11 @@ export function useCadastroPessoa() {
     setSalvando(true);
     setMensagem("");
 
-    const dados = {
-      nomeUsuario: formulario.nomeUsuario.trim(),
-      email: formulario.email.trim().toLowerCase(),
-      senha: formulario.senha,
-      cpf: formulario.cpf.replace(/\D/g, ""),
-      dataNascimento: formulario.dataNascimento,
-    };
-
     try {
-      if (formulario.possuiVinculo) {
-        await cadastrarPessoa(
-          {
-            possuiVinculo: true,
-            dados: {
-              ...dados,
-              codigoCondominio:
-                formulario.codigoCondominio.trim().toUpperCase(),
-            },
-          },
-          controller.signal,
-        );
-      } else {
-        await cadastrarPessoa(
-          {
-            possuiVinculo: false,
-            dados: {
-              ...dados,
-              cep: formulario.cep.replace(/\D/g, ""),
-              numero: formulario.numero.trim(),
-              complemento: formulario.complemento.trim() || null,
-            },
-          },
-          controller.signal,
-        );
-      }
+      await cadastrarPessoa(resultado.dados.cadastro, controller.signal);
 
       if (!controller.signal.aborted) {
-        navigate("/usuarios", { replace: true });
+        navigate("/usuarios", { replace: true, state: { mensagemSucesso: "Usuário cadastrado com sucesso." } });
       }
     } catch (erro: unknown) {
       if (!controller.signal.aborted) {

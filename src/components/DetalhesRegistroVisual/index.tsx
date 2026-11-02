@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import SecaoRegistroModal from "../SecaoRegistroModal";
 import type { CampoEditor } from "../../types/editorModulo";
 import type { DetalhesVisuaisProps } from "../../types/visualAdmin";
+import { chaveItemEditor } from "../../utils/itensEditor";
+import SecaoRegistroModal from "../SecaoRegistroModal";
 
 function objeto(valor: unknown): Record<string, unknown> { return typeof valor === "object" && valor !== null && !Array.isArray(valor) ? valor as Record<string, unknown> : {}; }
 function mostrar(campo: CampoEditor, valor: unknown): string {
@@ -38,7 +39,7 @@ export default function DetalhesRegistroVisual({ campos, dados, modulo, id, onRe
           {modulo === "cursos" && campo.chave === "aulas" && <Link className="botao" to={`/cursos/${id}/aulas/cadastrar`}>Cadastrar aula</Link>}
         </div>
         {itens.length === 0 ? <p className="pagina-descricao">Nenhum registro.</p> : <div className="tabela-container"><table className="tabela-usuarios"><thead><tr><th scope="col">#</th>{colunas.map((coluna) => <th scope="col" key={coluna.chave}>{coluna.titulo}</th>)}{modulo === "cursos" && <th scope="col">Ações</th>}</tr></thead>
-          <tbody>{itens.map((item, indice) => <tr key={String(item.id ?? indice)}><td>{indice + 1}</td>{colunas.map((coluna) => <td key={coluna.chave}>{mostrar(coluna, item[coluna.chave])}</td>)}
+          <tbody>{itens.map((item, indice) => <tr key={chaveItemEditor(item)}><td>{indice + 1}</td>{colunas.map((coluna) => <td key={coluna.chave}>{mostrar(coluna, item[coluna.chave])}</td>)}
             {modulo === "cursos" && <td><Link className="botao" to={`/cursos/${id}/aulas/${String(item.id)}/editar`}>Editar aula</Link></td>}
           </tr>)}</tbody></table></div>}
       </section>;

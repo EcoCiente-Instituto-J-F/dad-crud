@@ -1,23 +1,13 @@
 import { useState } from "react";
+import type { FormularioProps } from "../../types/perfilContratos";
 
 import Campo from "../../components/Campo";
 import EstadoRequisicao from "../../components/EstadoRequisicao";
 
 import { useMinhaContaApi } from "../../hooks/useMinhaContaApi";
 
-import type { UsuarioApi } from "../../types/usuarioApi";
-import type {
-  AlterarSenhaApi,
-  AtualizarPerfilApi,
-} from "../../types/perfilApi";
 
-interface FormularioProps {
-  usuario: UsuarioApi;
-  salvando: boolean;
-  mensagem: string;
-  salvarPerfil: (dados: AtualizarPerfilApi) => Promise<void>;
-  salvarSenha: (dados: AlterarSenhaApi) => Promise<void>;
-}
+
 
 function Formularios({
   usuario,
@@ -26,15 +16,18 @@ function Formularios({
   salvarPerfil,
   salvarSenha,
 }: FormularioProps) {
-  const [nome, setNome] = useState(usuario.nome);
-  const [email, setEmail] = useState(usuario.email);
-  const [avatar, setAvatar] = useState(usuario.avatar ?? "");
-  const [telefone, setTelefone] = useState("");
-  const [telefoneId, setTelefoneId] = useState("");
-
-  const [senhaAtual, setSenhaAtual] = useState("");
-  const [novaSenha, setNovaSenha] = useState("");
-  const [confirmacaoSenha, setConfirmacaoSenha] = useState("");
+  const [perfil, setPerfil] = useState({ nome: usuario.nome, email: usuario.email, avatar: usuario.avatar ?? "", telefone: "", telefoneId: "" });
+  const { nome, email, avatar, telefone, telefoneId } = perfil;
+  const setNome = (nome: string): void => setPerfil((atual) => ({ ...atual, nome }));
+  const setEmail = (email: string): void => setPerfil((atual) => ({ ...atual, email }));
+  const setAvatar = (avatar: string): void => setPerfil((atual) => ({ ...atual, avatar }));
+  const setTelefone = (telefone: string): void => setPerfil((atual) => ({ ...atual, telefone }));
+  const setTelefoneId = (telefoneId: string): void => setPerfil((atual) => ({ ...atual, telefoneId }));
+  const [senhas, setSenhas] = useState({ senhaAtual: "", novaSenha: "", confirmacaoSenha: "" });
+  const { senhaAtual, novaSenha, confirmacaoSenha } = senhas;
+  const setSenhaAtual = (senhaAtual: string): void => setSenhas((atual) => ({ ...atual, senhaAtual }));
+  const setNovaSenha = (novaSenha: string): void => setSenhas((atual) => ({ ...atual, novaSenha }));
+  const setConfirmacaoSenha = (confirmacaoSenha: string): void => setSenhas((atual) => ({ ...atual, confirmacaoSenha }));
 
   return (
     <section>

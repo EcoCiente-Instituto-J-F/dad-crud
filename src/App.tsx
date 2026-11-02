@@ -116,10 +116,7 @@ export default function App() {
 
             <Route path="/coletas" element={<Coletas />} />
             <Route path="/coletas/calendario" element={<CalendarioColetas />} />
-            <Route
-              path="/coletas/cadastrar"
-              element={<ColetaFormulario key="cadastro" modo="cadastro" />}
-            />
+            <Route path="/coletas/cadastrar" element={<Navigate to="/coletas" replace />} />
             <Route path="/coletas/:id" element={<ColetaDetalhes />} />
             <Route
               path="/coletas/:id/editar"

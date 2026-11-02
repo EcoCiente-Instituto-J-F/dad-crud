@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "lint": "oxlint src scripts vite.config.ts --deny-warnings",
+    "preview": "vite preview",
+    "verificar": "node scripts/verificar-projeto.mjs",
+    "test": "node scripts/testar-contratos.mjs",
+    "check": "npm run verificar && npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "lucide-react": "^1.61.0",

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect,useRef,useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ZodError } from "zod";
+import { prepararItensEditor } from "../utils/itensEditor";
 
 import {
-  buscarModulo,
-  salvarModulo,
+buscarModulo,
+salvarModulo,
 } from "../services/editorModuloService";
 import { ErroHttp } from "../services/httpService";
 
@@ -18,7 +19,7 @@ export function useEditorModulo(
   const navigate = useNavigate();
   const operacao = useRef<AbortController | null>(null);
 
-  const [dados, setDados] = useState(inicial);
+  const [dados, setDados] = useState(() => prepararItensEditor(inicial));
   const [carregando, setCarregando] = useState(id !== null);
   const [falhaCarga, setFalhaCarga] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -29,23 +30,19 @@ export function useEditorModulo(
     if (id === null) return;
 
     const controller = new AbortController();
-    setCarregando(true);
-    setFalhaCarga("");
-
-    buscarModulo(modulo, id, controller.signal)
-      .then((resposta) => {
-        if (!controller.signal.aborted) setDados(resposta);
-      })
-      .catch((erro: unknown) => {
-        if (!controller.signal.aborted) {
-          setFalhaCarga(
-            erro instanceof Error ? erro.message : "Falha ao carregar.",
-          );
-        }
-      })
-      .finally(() => {
+    async function carregar(): Promise<void> {
+      setCarregando(true);
+      setFalhaCarga("");
+      try {
+        const resposta = await buscarModulo(modulo, id!, controller.signal);
+        if (!controller.signal.aborted) setDados(prepararItensEditor(resposta));
+      } catch (erro: unknown) {
+        if (!controller.signal.aborted) setFalhaCarga(erro instanceof Error ? erro.message : "Falha ao carregar.");
+      } finally {
         if (!controller.signal.aborted) setCarregando(false);
-      });
+      }
+    }
+    void carregar();
 
     return () => controller.abort();
   }, [modulo, id, tentativa]);
@@ -66,7 +63,7 @@ export function useEditorModulo(
       await salvarModulo(modulo, id, dados, controller.signal);
 
       if (!controller.signal.aborted) {
-        navigate(`/${modulo}`, { replace: true });
+        navigate(`/${modulo}`, { replace: true, state: { mensagemSucesso: "Registro salvo com sucesso." } });
       }
     } catch (erro: unknown) {
       if (controller.signal.aborted) return;

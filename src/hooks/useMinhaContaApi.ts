@@ -1,27 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback,useEffect,useRef,useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { validarPerfilApi,validarSenhaApi } from "../utils/validarContaApi";
 
-import { useConsulta } from "./useConsulta";
 import { buscarUsuarioApi } from "../services/usuariosApiService";
+import { useConsulta } from "./useConsulta";
 
 import {
-  alterarMinhaSenhaApi,
-  atualizarMeuPerfilApi,
+alterarMinhaSenhaApi,
+atualizarMeuPerfilApi,
 } from "../services/contaApiService";
 
 import {
-  lerSessao,
-  removerSessao,
-  salvarSessao,
+lerSessao,
+removerSessao,
+salvarSessao,
 } from "../services/sessaoService";
 
 import { ErroHttp } from "../services/httpService";
 
 import type {
-  AlterarSenhaApi,
-  AtualizarPerfilApi,
+AlterarSenhaApi,
+AtualizarPerfilApi,
 } from "../types/perfilApi";
 
 export function useMinhaContaApi() {
+  const navigate = useNavigate();
   const operacao = useRef<AbortController | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState("");
@@ -47,11 +50,18 @@ export function useMinhaContaApi() {
     dados: AtualizarPerfilApi | AlterarSenhaApi,
   ): Promise<void> {
     if (operacao.current) return;
+    const validacao = tipo === "perfil" && "nome" in dados
+      ? validarPerfilApi(dados)
+      : "senhaAtual" in dados ? validarSenhaApi(dados) : null;
+    if (!validacao || !validacao.valido) {
+      setMensagem(validacao && !validacao.valido ? Object.entries(validacao.erros).map(([campo, texto]) => `${campo}: ${texto}`).join(" • ") : "Dados inválidos.");
+      return;
+    }
 
     const sessao = lerSessao();
 
     if (!sessao) {
-      window.location.replace("/login");
+      navigate("/login", { replace: true });
       return;
     }
 
@@ -74,7 +84,7 @@ export function useMinhaContaApi() {
           sessao.perfil.email.toLowerCase()
         ) {
           removerSessao();
-          window.location.replace("/login");
+          navigate("/login", { replace: true });
           return;
         }
 
@@ -90,7 +100,7 @@ export function useMinhaContaApi() {
         });
 
         // Recarrega também o contexto e o avatar do cabeçalho.
-        window.location.replace("/perfil");
+        consulta.recarregar();
       } else if (tipo === "senha" && "senhaAtual" in dados) {
         if (dados.novaSenha !== dados.confirmacaoSenha) {
           throw new Error("A confirmação da senha não corresponde.");
@@ -101,7 +111,7 @@ export function useMinhaContaApi() {
 
         if (lerSessao()?.token === sessao.token) {
           removerSessao();
-          window.location.replace("/login");
+          navigate("/login", { replace: true });
         }
       }
     } catch (erro: unknown) {

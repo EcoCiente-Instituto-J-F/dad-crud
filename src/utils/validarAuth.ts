@@ -3,23 +3,21 @@ import { z } from "zod";
 import { validarSchema } from "./validarSchema";
 
 import type {
-  Credenciais,
-  DadosPerfil,
-  DadosSenha,
+Credenciais,
+DadosPerfil,
+DadosSenha,
 } from "../types/auth";
 import type { ResultadoFormulario } from "../types/formulario";
 
 export const perfilAdminSchema = z.object({
   id: z.number().int().positive(),
-  nome: z.string().trim().min(3).max(100),
-  email: z.string().trim().email().max(160),
+  nome: z.string().trim().min(1).max(100),
+  email: z.string().trim().email().max(255),
   cpf: z.string().max(14),
   telefone: z.string().max(20),
-  avatar: z.string().max(900000).refine(
-    (valor) =>
-      valor === "" ||
-      /^data:image\/(?:png|jpeg|webp);base64,[a-zA-Z0-9+/=]+$/.test(valor),
-    "Imagem inválida.",
+  avatar: z.string().max(500).refine(
+    (valor) => valor === "" || /^https?:\/\/[^\s]+$/i.test(valor),
+    "Informe uma URL HTTP ou HTTPS para o avatar.",
   ),
 });
 

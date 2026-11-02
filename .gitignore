@@ -26,3 +26,18 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+
+# Configuração local, backups e verificações do EcoCiente
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.local
+*.tsbuildinfo
+backup-*/
+**/*.backup-*
+.ecociente-testes-*/
+
+.ecociente-backups/

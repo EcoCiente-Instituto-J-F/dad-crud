@@ -1,7 +1,7 @@
-import CardColetasHoje from "../../components/CardColetasHoje";
+import { CalendarDays,FileImage,UsersRound } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, FileImage, UsersRound } from "lucide-react";
+import CardColetasHoje from "../../components/CardColetasHoje";
 
 import EstadoRequisicao from "../../components/EstadoRequisicao";
 
@@ -213,7 +213,7 @@ return (
 
                   {serie.valores.map((valor, indice) => (
                     <circle
-                      key={indice}
+                      key={dados.evolucao[indice].mes}
                       cx={obterX(indice, serie.valores.length)}
                       cy={obterY(valor)}
                       r="3"

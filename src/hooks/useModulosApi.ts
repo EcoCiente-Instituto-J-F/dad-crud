@@ -1,20 +1,20 @@
-import { useCallback, useState } from "react";
+import { useCallback,useState } from "react";
 
 import { useConsulta } from "./useConsulta";
 
 import {
-  carregarDashboardApi,
-  coletasApi,
-  condominiosApi,
-  cooperativasApi,
-  cursosApi,
-  quizzesApi,
+carregarDashboardApi,
+coletasApi,
+condominiosApi,
+cooperativasApi,
+cursosApi,
+quizzesApi,
 } from "../services/modulosApiService";
 
 import type {
-  FiltrosColetasApi,
-  FiltrosCondominiosApi,
-  FiltrosPaginaApi,
+FiltrosColetasApi,
+FiltrosCondominiosApi,
+FiltrosPaginaApi,
 } from "../types/modulosApi";
 
 function useListaApi<T, F extends FiltrosPaginaApi>(
@@ -99,6 +99,7 @@ function useDetalheApi<T>(
 ) {
   const consultar = useCallback(
     (signal: AbortSignal) => {
+      if (!idRota) throw new Error("Identificação não informada.");
       const id = Number(idRota);
 
       if (!Number.isSafeInteger(id) || id <= 0) {
