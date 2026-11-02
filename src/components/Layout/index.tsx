@@ -13,6 +13,10 @@ import {
   UsersRound,
 } from "lucide-react";
 
+import Acessibilidade from "../PainelAcessibilidade";
+import MascoteEko from "../MascoteEko";
+import RecursosLeitura from "../RecursosLeitura";
+import IndicadorFocoTeclado from "../IndicadorFocoTeclado";
 import Cabecalho from "../Cabecalho";
 import MenuLateral from "../MenuLateral";
 import Modal from "../Modal";
@@ -38,6 +42,7 @@ export default function Layout() {
 
   return (
     <div className="aplicacao">
+      <a href="#conteudo-principal" className="link-pular-conteudo">Pular para o conteúdo principal</a>
       <Cabecalho />
 
       <div
@@ -79,7 +84,7 @@ export default function Layout() {
           </div>
         </aside>
 
-        <main className="conteudo">
+        <main className="conteudo" id="conteudo-principal" tabIndex={-1}>
           <Suspense
             fallback={
               <p className="mensagem-carregamento" role="status">
@@ -95,6 +100,11 @@ export default function Layout() {
       <footer className="rodape">
         EcoCiente — dados que despertam consciência
       </footer>
+
+      <Acessibilidade />
+      <RecursosLeitura />
+      <MascoteEko />
+      <IndicadorFocoTeclado />
 
       <Modal
         aberto={confirmarSaida}
