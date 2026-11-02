@@ -121,7 +121,7 @@ export default function PainelAcessibilidade() {
 
   useEffect(() => {
     const atalho = (evento: KeyboardEvent) => {
-      if (!evento.shiftKey || evento.altKey || evento.ctrlKey || evento.metaKey) return;
+      if (evento.altKey || evento.metaKey || !(evento.ctrlKey || evento.shiftKey)) return;
       const alvo = evento.target;
       if (
         alvo instanceof HTMLInputElement ||

@@ -1300,3 +1300,23 @@ html[data-eco-esconder-decorativas="true"] .eco-a11y-raiz img[alt=""] {
 .eco-a11y-atalho__icone img {width:50px;height:50px;object-fit:contain;}
 .eko-flutuante__balao img {object-fit:contain;}
 html[data-eco-contraste="escuro"] .eco-a11y-painel {background:#101d16!important;}
+
+
+/* Indicador de foco em teclado inspirado na referencia Zuppy, cores EcoCiente. */
+.eco-indicador-foco {
+ position:fixed; z-index:12000; pointer-events:none;
+ box-sizing:border-box; border:4px solid #D0D2AD; border-radius:20px;
+ box-shadow:0 0 0 2px #fff,0 8px 24px #0003;
+ transition:left 80ms ease,top 80ms ease,width 80ms ease,height 80ms ease;
+}
+.eco-indicador-foco[hidden] {display:none!important;}
+.eco-indicador-foco img {
+ position:absolute;top:-34px;right:-29px;width:60px;height:60px;
+ object-fit:contain;pointer-events:none;
+}
+@media(max-width:640px){
+ .eco-indicador-foco img{width:46px;height:46px;right:-20px;top:-26px;}
+}
+@media(prefers-reduced-motion:reduce){
+ .eco-indicador-foco{transition:none;}
+}

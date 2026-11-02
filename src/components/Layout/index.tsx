@@ -16,6 +16,7 @@ import {
 import Acessibilidade from "../PainelAcessibilidade";
 import MascoteEko from "../MascoteEko";
 import RecursosLeitura from "../RecursosLeitura";
+import IndicadorFocoTeclado from "../IndicadorFocoTeclado";
 import Cabecalho from "../Cabecalho";
 import MenuLateral from "../MenuLateral";
 import Modal from "../Modal";
@@ -103,6 +104,7 @@ export default function Layout() {
       <Acessibilidade />
       <RecursosLeitura />
       <MascoteEko />
+      <IndicadorFocoTeclado />
 
       <Modal
         aberto={confirmarSaida}
