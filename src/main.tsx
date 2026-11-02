@@ -1,7 +1,7 @@
 import "./services/modoDemo";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, HashRouter } from "react-router-dom";
 
 import App from "./App";
 import AuthProvider from "./components/AuthProvider";
@@ -17,14 +17,16 @@ if (!elementoRaiz) {
   throw new Error("Não foi encontrado o elemento #root no HTML.");
 }
 
+const Router = import.meta.env.MODE === "pages" ? HashRouter : BrowserRouter;
+
 createRoot(elementoRaiz).render(
   <StrictMode>
-    <BrowserRouter>
+    <Router>
       <AcessibilidadeProvider>
         <AuthProvider>
           <App />
         </AuthProvider>
       </AcessibilidadeProvider>
-    </BrowserRouter>
+    </Router>
   </StrictMode>,
 );
