@@ -5,7 +5,7 @@ export type FonteAcessivel = "padrao" | "arial" | "verdana" | "georgia";
 export type ContrasteAcessivel = "padrao" | "claro" | "escuro";
 export type NivelEspacamento = 0 | 1 | 2 | 3;
 
-export interface PreferenciasAcessibilidade {
+export type PreferenciasAcessibilidade = {
   _versao: 1;
   escalaFonte: EscalaFonte;
   fonte: FonteAcessivel;
@@ -25,7 +25,7 @@ export interface PreferenciasAcessibilidade {
   modoDaltonico: NivelEspacamento;
 }
 
-export interface AcessibilidadeContexto {
+export type AcessibilidadeContexto = {
   preferencias: PreferenciasAcessibilidade;
   atualizar: <K extends keyof PreferenciasAcessibilidade>(
     campo: K,
