@@ -15,13 +15,15 @@ export default function Selecao({
       <select
         id={id}
         value={valor}
+        aria-invalid={Boolean(erro)}
+        aria-describedby={erro ? id + "-erro" : undefined}
         onChange={(evento) => onChange(evento.target.value)}
       >
         {children}
       </select>
 
       {erro && (
-        <span className="erro-campo" role="alert">
+        <span id={id + "-erro"} className="erro-campo" role="alert">
           {erro}
         </span>
       )}
