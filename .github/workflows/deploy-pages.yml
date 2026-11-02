@@ -41,8 +41,8 @@ jobs:
           VITE_CADASTRO_API_URL: ${{ vars.VITE_CADASTRO_API_URL }}
           VITE_SENHA_API_URL: ${{ vars.VITE_SENHA_API_URL }}
           VITE_MODO_DEMO: 'false'
-          VITE_CALENDARIO_OCORRENCIAS_ATIVO: 'false'
-          VITE_IMPORTACAO_USUARIOS_ATIVA: 'false'
+          VITE_CALENDARIO_OCORRENCIAS_ATIVO: ${{ vars.VITE_CALENDARIO_OCORRENCIAS_ATIVO || 'false' }}
+          VITE_IMPORTACAO_USUARIOS_ATIVA: ${{ vars.VITE_IMPORTACAO_USUARIOS_ATIVA || 'false' }}
 
       - name: Check built artifacts
         shell: bash
