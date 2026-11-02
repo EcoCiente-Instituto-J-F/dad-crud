@@ -116,7 +116,7 @@ export default function PainelAcessibilidade() {
 
   useEffect(() => {
     window.speechSynthesis?.cancel();
-    setLendo(false);
+    queueMicrotask(() => setLendo(false));
   }, [rota.pathname]);
 
   useEffect(() => {
