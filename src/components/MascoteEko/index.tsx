@@ -14,9 +14,10 @@ const frases = [
   "Continue espalhando sustentabilidade!",
 ];
 
-const gif = "/acessibilidade/imagens/eko-animado.gif";
-const imagem = "/acessibilidade/imagens/eko-hover.png";
-const reserva = "/eko-mascote.svg";
+const base = import.meta.env.BASE_URL;
+const gif = `${base}acessibilidade/imagens/eko-animado.gif`;
+const imagem = `${base}acessibilidade/imagens/eko-hover.png`;
+const reserva = `${base}eko-mascote.svg`;
 
 type Posicao = { x: number; y: number };
 type Arraste = {
@@ -148,7 +149,7 @@ export default function MascoteEko() {
         role="tooltip"
         aria-hidden={!visivel}
       >
-        <img src="/acessibilidade/imagens/eko-balao.png" alt="" aria-hidden="true" />
+        <img src={`${base}acessibilidade/imagens/eko-balao.png`} alt="" aria-hidden="true" />
         <span>{frase}</span>
       </div>
       <button

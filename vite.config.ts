@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    base: mode === "pages" ? "/dad-crud/" : "/",
 
     server: {
       port: 5173,

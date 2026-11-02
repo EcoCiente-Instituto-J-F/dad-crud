@@ -35,8 +35,8 @@ const nomesTexto = ["Original", "Arial", "Verdana", "Georgia"];
 const nomesEspacamento = ["Original", "Médio", "Grande", "Muito grande"];
 const nomesSaturacao = ["Original", "Baixa", "Alta", "Escala de cinza"];
 const nomesDaltonismo = ["Desativado", "Protanopia", "Deuteranopia", "Tritanopia"];
-const icones = "/acessibilidade/icones/";
-const imagens = "/acessibilidade/imagens/";
+const icones = `${import.meta.env.BASE_URL}acessibilidade/icones/`;
+const imagens = `${import.meta.env.BASE_URL}acessibilidade/imagens/`;
 
 function CartaoRecurso({ codigo, titulo, estado, ativo, nivel, onClick }: CartaoProps) {
   return (
