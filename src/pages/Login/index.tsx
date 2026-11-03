@@ -76,7 +76,7 @@ export default function Login() {
                   autoComplete="username"
                   autoCapitalize="none"
                   spellCheck={false}
-                  placeholder="seu.email@picpay.com"
+                  placeholder="seu.email@ecociente.com.br"
                   maxLength={160}
                   value={formulario.email}
                   aria-invalid={Boolean(erros.email)}
