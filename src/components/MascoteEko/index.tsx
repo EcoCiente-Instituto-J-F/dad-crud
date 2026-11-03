@@ -2,16 +2,18 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent } from "react";
 
 const frases = [
-  "Oi! Que bom te ver por aqui! 🌱",
-  "Cada coleta é um carinho com o planeta!",
-  "Vamos cultivar boas ideias hoje? 💚",
-  "Você faz a diferença, sabia?",
-  "Um planeta melhor começa com a gente!",
-  "A natureza agradece seu cuidado! 🌿",
-  "Seu trabalho transforma o futuro!",
-  "Juntos, fazemos o EcoCiente crescer!",
-  "Pequenas atitudes geram grandes mudanças!",
-  "Continue espalhando sustentabilidade!",
+  "Oi! Que bom ter você aqui! 🌱",
+  "Hoje é um ótimo dia para cuidar do planeta! 💚",
+  "Pequenas atitudes fazem florescer grandes mudanças.",
+  "Seu cuidado deixa o mundo mais verdinho! 🌿",
+  "Cada coleta é uma conquista para o planeta!",
+  "Você faz a diferença todos os dias. ✨",
+  "Vamos transformar boas ideias em boas ações?",
+  "O futuro sustentável começa com a gente!",
+  "Siga espalhando essa energia verde! 🍃",
+  "Uma atitude consciente inspira muitas outras.",
+  "Cuidar da natureza também é cuidar de nós.",
+  "Juntos, fazemos o EcoCiente florescer! 🌼",
 ];
 
 const base = import.meta.env.BASE_URL;
@@ -145,12 +147,17 @@ export default function MascoteEko() {
     >
       <div
         id="eko-balao"
-        className={"eko-flutuante__balao" + (visivel && !arrastando ? " eko-flutuante__balao--ativo" : "")}
+        className={
+          "eko-flutuante__balao" +
+          (visivel && !arrastando ? " eko-flutuante__balao--ativo" : "") +
+          (posicao.x < 175 ? " eko-flutuante__balao--ancora-esquerda" : "") +
+          (posicao.y < 185 ? " eko-flutuante__balao--abaixo" : "")
+        }
         role="tooltip"
-        aria-hidden={!visivel}
+        aria-hidden={!visivel || arrastando}
       >
-        <img src={`${base}acessibilidade/imagens/eko-balao.png`} alt="" aria-hidden="true" />
-        <span>{frase}</span>
+        <span className="eko-flutuante__balao-selo" aria-hidden="true">🌱 Um recadinho do Eko</span>
+        <span className="eko-flutuante__balao-frase">{frase}</span>
       </div>
       <button
         type="button"
