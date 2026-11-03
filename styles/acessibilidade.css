@@ -1279,26 +1279,160 @@ html[data-eco-esconder-decorativas="true"] .eco-a11y-raiz img[alt=""] {
   }
 }
 
-/* Eko: GIF no estado padrão, imagem estática e balão-imagem no hover. */
-.eko-flutuante__botao {position:relative;}
-.eko-flutuante__gif,.eko-flutuante__imagem {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transition:opacity 280ms ease,transform 350ms ease;}
-.eko-flutuante__gif {opacity:1;}
-.eko-flutuante__imagem {opacity:0;transform:scale(.94);}
-.eko-flutuante:hover .eko-flutuante__gif,.eko-flutuante:focus-within .eko-flutuante__gif {opacity:0;transform:scale(1.06);}
-.eko-flutuante:hover .eko-flutuante__imagem,.eko-flutuante:focus-within .eko-flutuante__imagem {opacity:1;transform:scale(1);}
-.eko-flutuante__balao {right:70px;bottom:126px;width:220px;max-width:none;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;display:grid;place-items:center;opacity:0;visibility:hidden;transform:translateY(7px);pointer-events:none;}
-.eko-flutuante__balao img {width:100%;height:auto;display:block;}
-.eko-flutuante__balao span {position:absolute;inset:12px 13px 18px;display:grid;place-items:center;padding:3px 5px;color:#064e3b;font-size:12px;font-weight:800;line-height:1.28;text-align:center;}
-.eko-flutuante:hover .eko-flutuante__balao,.eko-flutuante:focus-within .eko-flutuante__balao,.eko-flutuante__balao--ativo {opacity:1;visibility:visible;transform:translateY(0);}
-.eko-flutuante--arrastando .eko-flutuante__balao {opacity:0!important;visibility:hidden!important;}
-.eko-flutuante--arrastando .eko-flutuante__gif {opacity:1!important;}
-.eko-flutuante--arrastando .eko-flutuante__imagem {opacity:0!important;}
-@media (prefers-reduced-motion:reduce) {.eko-flutuante__gif,.eko-flutuante__imagem,.eko-flutuante__balao {transition:none!important;}}
+/* Eko flutuante: arte animada em repouso, Eko acenando no hover e fala em CSS. */
+.eko-flutuante__botao {
+  position: relative;
+}
+
+.eko-flutuante__gif,
+.eko-flutuante__imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: opacity 260ms ease, transform 320ms ease;
+}
+
+.eko-flutuante__gif { opacity: 1; }
+.eko-flutuante__imagem { opacity: 0; transform: scale(.94); }
+
+.eko-flutuante:hover .eko-flutuante__gif,
+.eko-flutuante:focus-within .eko-flutuante__gif {
+  opacity: 0;
+  transform: scale(1.04);
+}
+
+.eko-flutuante:hover .eko-flutuante__imagem,
+.eko-flutuante:focus-within .eko-flutuante__imagem {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.eko-flutuante__balao {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% - 20px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  width: min(260px, calc(100vw - 28px));
+  max-width: none;
+  padding: 14px 17px 16px;
+  border: 2px solid #c8e6d3;
+  border-radius: 20px 20px 8px 20px;
+  background: linear-gradient(150deg, #ffffff, #effaf0);
+  color: #064e3b;
+  box-shadow: 0 12px 32px rgb(6 78 59 / 18%);
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(9px) scale(.97);
+  transform-origin: 85% 100%;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 220ms ease, visibility 180ms ease;
+}
+
+.eko-flutuante__balao::after {
+  content: "";
+  position: absolute;
+  right: 41px;
+  bottom: -9px;
+  width: 15px;
+  height: 15px;
+  background: #effaf0;
+  border-right: 2px solid #c8e6d3;
+  border-bottom: 2px solid #c8e6d3;
+  transform: rotate(45deg);
+}
+
+.eko-flutuante__balao-selo {
+  color: #19815b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .015em;
+}
+
+.eko-flutuante__balao-frase {
+  display: block;
+  color: #064e3b;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.eko-flutuante__balao--ancora-esquerda {
+  right: auto;
+  left: 0;
+  border-radius: 20px 20px 20px 8px;
+  transform-origin: 15% 100%;
+}
+
+.eko-flutuante__balao--ancora-esquerda::after {
+  right: auto;
+  left: 41px;
+}
+
+.eko-flutuante__balao--abaixo {
+  top: calc(100% - 20px);
+  bottom: auto;
+  transform-origin: 85% 0;
+}
+
+.eko-flutuante__balao--abaixo::after {
+  top: -9px;
+  bottom: auto;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 2px solid #c8e6d3;
+  border-top: 2px solid #c8e6d3;
+}
+
+.eko-flutuante__balao--ancora-esquerda.eko-flutuante__balao--abaixo {
+  transform-origin: 15% 0;
+}
+
+.eko-flutuante:hover .eko-flutuante__balao,
+.eko-flutuante:focus-within .eko-flutuante__balao,
+.eko-flutuante__balao--ativo {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.eko-flutuante--arrastando .eko-flutuante__balao {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.eko-flutuante--arrastando .eko-flutuante__gif { opacity: 1 !important; }
+.eko-flutuante--arrastando .eko-flutuante__imagem { opacity: 0 !important; }
+
+@media (max-width: 700px) {
+  .eko-flutuante__balao {
+    right: 0;
+    bottom: calc(100% - 13px);
+    width: min(224px, calc(100vw - 24px));
+    padding: 12px 13px 14px;
+  }
+  .eko-flutuante__balao--ancora-esquerda { right: auto; left: 0; }
+  .eko-flutuante__balao--abaixo { top: calc(100% - 13px); bottom: auto; }
+  .eko-flutuante__balao-frase { font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eko-flutuante__gif,
+  .eko-flutuante__imagem,
+  .eko-flutuante__balao { transition: none !important; }
+}
 
 /* Image-based assets */
 .eco-a11y-card__imagem img { width: 38px; height: 38px; object-fit:contain; }
 .eco-a11y-atalho__icone img {width:50px;height:50px;object-fit:contain;}
-.eko-flutuante__balao img {object-fit:contain;}
 html[data-eco-contraste="escuro"] .eco-a11y-painel {background:#101d16!important;}
 
 
