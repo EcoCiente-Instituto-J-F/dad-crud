@@ -1424,7 +1424,17 @@ html[data-eco-esconder-decorativas="true"] .eco-a11y-raiz img[alt=""] {
   .eko-flutuante__balao-frase { font-size: 13px; }
 }
 
+html[data-eco-pausar-animacoes="true"] .eko-flutuante__gif {
+  display: none;
+}
+html[data-eco-pausar-animacoes="true"] .eko-flutuante__imagem {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .eko-flutuante__gif { display: none; }
+  .eko-flutuante__imagem { opacity: 1 !important; transform: none !important; }
   .eko-flutuante__gif,
   .eko-flutuante__imagem,
   .eko-flutuante__balao { transition: none !important; }
