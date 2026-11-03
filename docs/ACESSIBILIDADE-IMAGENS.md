@@ -12,8 +12,8 @@ Pasta: `public/acessibilidade/imagens/`
 
 **Eko e balão**:
 - `eko-animado.gif` (estado padrão)
-- `eko-hover.png` (hover)
-- `eko-balao.png` (imagem de fundo do balão)
+- `eko-hover.png` (Eko parado, acenando ao passar o mouse)
+- Balão de fala do Eko: construído em React/CSS, sem arquivo de imagem
 
 **17 cards** (PNG transparente):
 - `card-tradutor-libras.png`
@@ -36,14 +36,18 @@ Pasta: `public/acessibilidade/imagens/`
 
 Cada componente usa `<img>` e, se a imagem PNG do card/botão não estiver presente, exibe o ícone SVG de reserva. Os SVGs são temporários, não a arte final.
 
-Para Eko, use GIF e PNG com dimensões equivalentes e fundo transparente; recomendamos PNG/GIF com canvas 256 × 296 px. O balão pode ser PNG 620 × 316 px, transparente; texto permanece como HTML para manter legibilidade/idioma e frases variáveis. O GIF animado e imagem estática não são implementados por CSS: CSS faz somente a transição entre duas imagens.
+Para Eko, use GIF e PNG com dimensões equivalentes e fundo transparente; recomendamos PNG/GIF com canvas 256 × 296 px. O balão motivacional é renderizado diretamente em HTML/CSS, com frases variáveis e uma seta visual. Não é necessário nem utilizado arquivo `eko-balao.png`. O GIF contém a animação original e o CSS faz a troca para a imagem parada ao passar o mouse ou focalizar o mascote.
+
+**Marcador de teclado**: salve `eko_marcador.png` na mesma pasta `public/acessibilidade/imagens/`; o componente usa `import.meta.env.BASE_URL`, compatível com GitHub Pages.
+
+**ZIP de artes do Eko**: os nomes originais `animacao_parado.gif`, `eko_acenando.png` e `eko_marcador.png` devem ser enviados ao repositório com os nomes finais `eko-animado.gif`, `eko-hover.png` e `eko_marcador.png`. Os 17 cards e dois botões de acessibilidade não são alterados por essa entrega.
 
 ## Como rodar
 
 ```powershell
 cd C:\Users\juliomenezes-ieg\dad-crud
 git fetch origin
-git switch feat/acessibilidade-dad-atualizada
+git switch main
 npm ci
 npm run dev
 ```
