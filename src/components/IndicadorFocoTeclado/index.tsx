@@ -133,7 +133,7 @@ export default function IndicadorFocoTeclado() {
       style={moldura ? moldura as CSSProperties : undefined}
     >
       <img
-        src={`${import.meta.env.BASE_URL}acessibilidade/imagens/eko_marcador.png`
+        src={`${import.meta.env.BASE_URL}acessibilidade/imagens/eko_marcador.png`}
         alt=""
         onError={(evento) => {
           evento.currentTarget.onerror = null;
